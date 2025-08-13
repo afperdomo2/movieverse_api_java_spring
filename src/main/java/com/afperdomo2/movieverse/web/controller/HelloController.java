@@ -1,8 +1,10 @@
-package com.afperdomo2.movieverse;
+package com.afperdomo2.movieverse.web.controller;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.afperdomo2.movieverse.domain.service.MovieverseAiService;
 
 @RestController
 public class HelloController {
@@ -15,7 +17,7 @@ public class HelloController {
         this.movieverseAiService = movieverseAiService;
     }
 
-    @GetMapping("/")
+    @GetMapping("/hello")
     public String sayHello() {
         return movieverseAiService.generateGreeting(this.platform);
     }
