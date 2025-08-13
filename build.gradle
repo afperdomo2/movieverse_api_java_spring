@@ -21,6 +21,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// LangChain4j
+	implementation 'dev.langchain4j:langchain4j-open-ai-spring-boot-starter:1.0.0-beta1'
+	implementation 'dev.langchain4j:langchain4j-spring-boot-starter:1.0.0-beta1'
 }
 
 tasks.named('test') {
