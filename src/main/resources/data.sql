@@ -6,7 +6,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -24,7 +24,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -42,7 +42,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -60,7 +60,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -78,7 +78,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -96,7 +96,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -114,7 +114,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -132,7 +132,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -150,7 +150,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -168,7 +168,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -186,7 +186,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -204,7 +204,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -222,7 +222,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -240,7 +240,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -258,7 +258,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -276,7 +276,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -294,7 +294,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -312,7 +312,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -330,7 +330,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -348,7 +348,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -366,7 +366,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -384,7 +384,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -402,7 +402,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -420,7 +420,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -438,7 +438,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -456,7 +456,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -474,7 +474,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -492,7 +492,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -510,7 +510,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -528,7 +528,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -546,7 +546,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -564,7 +564,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -582,7 +582,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -600,7 +600,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -618,7 +618,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -636,7 +636,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -654,7 +654,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -672,7 +672,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -690,7 +690,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -708,7 +708,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -726,7 +726,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -744,7 +744,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -762,7 +762,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -780,7 +780,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -798,7 +798,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -816,7 +816,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -834,7 +834,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -852,7 +852,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -870,7 +870,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -888,7 +888,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -906,7 +906,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -924,7 +924,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -942,7 +942,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -960,7 +960,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -978,7 +978,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -996,7 +996,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1014,7 +1014,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1032,7 +1032,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1050,7 +1050,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1068,7 +1068,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1086,7 +1086,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1104,7 +1104,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1122,7 +1122,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1140,7 +1140,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1158,7 +1158,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1176,7 +1176,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1194,7 +1194,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1212,7 +1212,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1230,7 +1230,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1248,7 +1248,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1266,7 +1266,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1284,7 +1284,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1302,7 +1302,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1320,7 +1320,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1338,7 +1338,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1356,7 +1356,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1374,7 +1374,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1392,7 +1392,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1410,7 +1410,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1428,7 +1428,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1446,7 +1446,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1464,7 +1464,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1482,7 +1482,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1500,7 +1500,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1518,7 +1518,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1536,7 +1536,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1554,7 +1554,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1572,7 +1572,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1590,7 +1590,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1608,7 +1608,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1626,7 +1626,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1644,7 +1644,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1662,7 +1662,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1680,7 +1680,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1698,7 +1698,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1716,7 +1716,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1734,7 +1734,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1752,7 +1752,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (
@@ -1770,7 +1770,7 @@ INSERT INTO
         duration,
         genre,
         release_date,
-        classification,
+        rating,
         status
     )
 VALUES (

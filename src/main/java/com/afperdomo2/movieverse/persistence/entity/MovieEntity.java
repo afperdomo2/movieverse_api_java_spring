@@ -30,7 +30,7 @@ public class MovieEntity {
     private LocalDate releaseDate;
 
     @Column(precision = 3, scale = 2)
-    private BigDecimal classification;
+    private BigDecimal rating;
 
     @Column(nullable = false, length = 1)
     private String status;
@@ -67,12 +67,12 @@ public class MovieEntity {
         this.releaseDate = releaseDate;
     }
 
-    public BigDecimal getClassification() {
-        return classification;
+    public BigDecimal getRating() {
+        return rating;
     }
 
-    public void setClassification(BigDecimal classification) {
-        this.classification = classification;
+    public void setRating(BigDecimal rating) {
+        this.rating = rating;
     }
 
     public String getStatus() {
