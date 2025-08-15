@@ -6,4 +6,6 @@ import com.afperdomo2.movieverse.domain.dto.MovieDto;
 
 public interface MovieRepository {
     List<MovieDto> findAll();
+
+    MovieDto findById(long id);
 }

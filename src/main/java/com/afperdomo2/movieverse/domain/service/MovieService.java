@@ -18,4 +18,8 @@ public class MovieService {
     public List<MovieDto> findAll() {
         return this.movieRepository.findAll();
     }
+
+    public MovieDto findById(long id) {
+        return this.movieRepository.findById(id);
+    }
 }
