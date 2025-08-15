@@ -5,8 +5,10 @@ import java.util.List;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
 
 @Mapper(componentModel = "spring", uses = { RatingMapper.class })
@@ -25,4 +27,9 @@ public interface MovieMapper {
 
     @InheritInverseConfiguration
     MovieEntity toEntity(MovieDto dto);
+
+    @Mapping(target = "title", source = "title")
+    @Mapping(target = "releaseDate", source = "releaseDate")
+    @Mapping(target = "rating", source = "rating")
+    void updateEntityFromDto(UpdateMovieDto updateMovieDto, @MappingTarget MovieEntity entity);
 }

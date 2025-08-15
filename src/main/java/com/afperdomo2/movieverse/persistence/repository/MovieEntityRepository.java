@@ -1,10 +1,12 @@
 package com.afperdomo2.movieverse.persistence.repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.repository.MovieRepository;
 import com.afperdomo2.movieverse.persistence.crud.CrudMovieEntity;
 import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
@@ -37,5 +39,19 @@ public class MovieEntityRepository implements MovieRepository {
         newMovie.setStatus("D");
         this.crudMovieEntity.save(newMovie);
         return this.movieMapper.toDto(newMovie);
+    }
+
+    @Override
+    public MovieDto update(long id, UpdateMovieDto changes) {
+        MovieEntity movie = this.crudMovieEntity.findById(id).orElse(null);
+        if (movie == null) {
+            return null;
+        }
+        // movie.setTitle(changes.title());
+        // movie.setReleaseDate(changes.releaseDate());
+        // movie.setRating(BigDecimal.valueOf(changes.rating()));
+        this.movieMapper.updateEntityFromDto(changes, movie);
+        this.crudMovieEntity.save(movie);
+        return this.movieMapper.toDto(movie);
     }
 }
