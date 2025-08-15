@@ -30,4 +30,12 @@ public class MovieEntityRepository implements MovieRepository {
         MovieEntity movie = this.crudMovieEntity.findById(id).orElse(null);
         return this.movieMapper.toDto(movie);
     }
+
+    @Override
+    public MovieDto create(MovieDto movieDto) {
+        MovieEntity newMovie = this.movieMapper.toEntity(movieDto);
+        newMovie.setStatus("D");
+        this.crudMovieEntity.save(newMovie);
+        return this.movieMapper.toDto(newMovie);
+    }
 }

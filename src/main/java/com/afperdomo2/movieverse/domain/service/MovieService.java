@@ -22,4 +22,8 @@ public class MovieService {
     public MovieDto findById(long id) {
         return this.movieRepository.findById(id);
     }
+
+    public MovieDto create(MovieDto movieDto) {
+        return this.movieRepository.create(movieDto);
+    }
 }

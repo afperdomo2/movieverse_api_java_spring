@@ -8,4 +8,6 @@ public interface MovieRepository {
     List<MovieDto> findAll();
 
     MovieDto findById(long id);
+
+    MovieDto create(MovieDto movieDto);
 }
