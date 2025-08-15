@@ -35,6 +35,14 @@ public class MovieEntity {
     @Column(nullable = false, length = 1)
     private String status;
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -82,5 +90,4 @@ public class MovieEntity {
     public void setStatus(String status) {
         this.status = status;
     }
-
 }
