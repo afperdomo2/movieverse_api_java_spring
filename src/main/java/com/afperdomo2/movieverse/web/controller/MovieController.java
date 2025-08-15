@@ -2,6 +2,7 @@ package com.afperdomo2.movieverse.web.controller;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,12 +21,17 @@ public class MovieController {
     }
 
     @GetMapping()
-    public List<MovieDto> findAll() {
-        return this.movieService.findAll();
+    public ResponseEntity<List<MovieDto>> findAll() {
+        List<MovieDto> movies = this.movieService.findAll();
+        return ResponseEntity.ok(movies);
     }
 
     @GetMapping("/{id}")
-    public MovieDto findById(@PathVariable("id") long id) {
-        return this.movieService.findById(id);
+    public ResponseEntity<MovieDto> findById(@PathVariable("id") long id) {
+        MovieDto movie = this.movieService.findById(id);
+        if (movie == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(movie);
     }
 }
