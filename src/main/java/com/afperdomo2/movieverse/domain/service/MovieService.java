@@ -8,6 +8,8 @@ import com.afperdomo2.movieverse.domain.dto.MovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.repository.MovieRepository;
 
+import dev.langchain4j.agent.tool.Tool;
+
 @Service
 public class MovieService {
     private final MovieRepository movieRepository;
@@ -16,6 +18,7 @@ public class MovieService {
         this.movieRepository = movieRepository;
     }
 
+    @Tool("Busca todas las películas que están dentro de la plataforma")
     public List<MovieDto> findAll() {
         return this.movieRepository.findAll();
     }

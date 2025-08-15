@@ -8,22 +8,26 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.SuggestionRequestDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.service.MovieService;
-import org.springframework.web.bind.annotation.PutMapping;
+import com.afperdomo2.movieverse.domain.service.MovieverseAiService;
 
 @RestController
 @RequestMapping("movies")
 public class MovieController {
     private final MovieService movieService;
+    private final MovieverseAiService movieverseAiService;
 
-    public MovieController(MovieService movieService) {
+    public MovieController(MovieService movieService, MovieverseAiService movieverseAiService) {
         this.movieService = movieService;
+        this.movieverseAiService = movieverseAiService;
     }
 
     @GetMapping()
@@ -63,5 +67,11 @@ public class MovieController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/suggestion")
+    public ResponseEntity<String> generateMoviesSuggestion(@RequestBody SuggestionRequestDto suggestionRequest) {
+        String response = this.movieverseAiService.generateMoviesSuggestion(suggestionRequest.userPreferences());
+        return ResponseEntity.ok(response);
     }
 }
