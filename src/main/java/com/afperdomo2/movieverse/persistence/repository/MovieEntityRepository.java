@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
+import com.afperdomo2.movieverse.domain.exception.MovieAlreadyExistsException;
+import com.afperdomo2.movieverse.domain.exception.MovieNotFoundException;
 import com.afperdomo2.movieverse.domain.repository.MovieRepository;
 import com.afperdomo2.movieverse.persistence.crud.CrudMovieEntity;
 import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
@@ -29,11 +31,17 @@ public class MovieEntityRepository implements MovieRepository {
     @Override
     public MovieDto findById(long id) {
         MovieEntity movie = this.crudMovieEntity.findById(id).orElse(null);
+        if (movie == null) {
+            throw new MovieNotFoundException(id);
+        }
         return this.movieMapper.toDto(movie);
     }
 
     @Override
     public MovieDto create(MovieDto movieDto) {
+        if (this.crudMovieEntity.findByTitle(movieDto.title()) != null) {
+            throw new MovieAlreadyExistsException(movieDto.title());
+        }
         MovieEntity newMovie = this.movieMapper.toEntity(movieDto);
         newMovie.setStatus("D");
         this.crudMovieEntity.save(newMovie);
@@ -44,7 +52,7 @@ public class MovieEntityRepository implements MovieRepository {
     public MovieDto update(long id, UpdateMovieDto changes) {
         MovieEntity movie = this.crudMovieEntity.findById(id).orElse(null);
         if (movie == null) {
-            return null;
+            throw new MovieNotFoundException(id);
         }
         // movie.setTitle(changes.title());
         // movie.setReleaseDate(changes.releaseDate());
@@ -57,7 +65,7 @@ public class MovieEntityRepository implements MovieRepository {
     @Override
     public boolean delete(long id) {
         if (!this.crudMovieEntity.existsById(id)) {
-            return false;
+            throw new MovieNotFoundException(id);
         }
         this.crudMovieEntity.deleteById(id);
         return true;
