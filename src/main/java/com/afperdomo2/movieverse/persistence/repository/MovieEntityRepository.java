@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.exception.MovieAlreadyExistsException;
@@ -38,11 +39,12 @@ public class MovieEntityRepository implements MovieRepository {
     }
 
     @Override
-    public MovieDto create(MovieDto movieDto) {
+    public MovieDto create(CreateMovieDto movieDto) {
         if (this.crudMovieEntity.findByTitle(movieDto.title()) != null) {
             throw new MovieAlreadyExistsException(movieDto.title());
         }
-        MovieEntity newMovie = this.movieMapper.toEntity(movieDto);
+        MovieEntity newMovie = new MovieEntity();
+        this.movieMapper.createEntityFromDto(movieDto, newMovie);
         newMovie.setStatus("D");
         this.crudMovieEntity.save(newMovie);
         return this.movieMapper.toDto(newMovie);

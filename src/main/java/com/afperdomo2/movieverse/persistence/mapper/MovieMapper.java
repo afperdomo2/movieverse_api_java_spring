@@ -7,6 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
@@ -32,4 +33,6 @@ public interface MovieMapper {
     @Mapping(target = "releaseDate", source = "releaseDate")
     @Mapping(target = "rating", source = "rating")
     void updateEntityFromDto(UpdateMovieDto updateMovieDto, @MappingTarget MovieEntity entity);
+
+    void createEntityFromDto(CreateMovieDto createMovieDto, @MappingTarget MovieEntity entity);
 }

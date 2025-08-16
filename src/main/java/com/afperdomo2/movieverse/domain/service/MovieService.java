@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.repository.MovieRepository;
@@ -27,7 +28,7 @@ public class MovieService {
         return this.movieRepository.findById(id);
     }
 
-    public MovieDto create(MovieDto movieDto) {
+    public MovieDto create(CreateMovieDto movieDto) {
         return this.movieRepository.create(movieDto);
     }
 
