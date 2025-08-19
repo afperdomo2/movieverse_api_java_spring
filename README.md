@@ -251,6 +251,91 @@ java -Dspring.profiles.active=prod -jar build/libs/movieverse-1.0.0.jar
 java -Xmx512m -Xms256m -jar build/libs/movieverse-1.0.0.jar
 ```
 
+### 🐳 Despliegue con Docker
+
+La aplicación incluye un `Dockerfile` optimizado con **multi-stage build** para despliegue en producción:
+
+#### Construcción de la Imagen Docker
+
+```bash
+# Construir la imagen Docker
+docker build -t movieverse-api .
+
+# Construir con un tag específico
+docker build -t movieverse-api:1.0.0 .
+```
+
+#### Ejecutar el Contenedor
+
+```bash
+# Ejecutar el contenedor (requiere base de datos externa)
+docker run -d \
+  --name movieverse-app \
+  -p 8080:8080 \
+  -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5434/movieverse \
+  -e SPRING_DATASOURCE_USERNAME=postgres \
+  -e SPRING_DATASOURCE_PASSWORD=123456 \
+  -e LANGCHAIN4J_OPEN_AI_CHAT_MODEL_API_KEY=tu_api_key_aqui \
+  movieverse-api
+```
+
+#### Despliegue Completo con Docker Compose
+
+Para un despliegue completo con base de datos incluida:
+
+```bash
+# Iniciar todos los servicios (base de datos + aplicación)
+docker-compose up -d
+
+# Ver logs de la aplicación
+docker-compose logs -f movieverse-app
+
+# Detener todos los servicios
+docker-compose down
+```
+
+#### Variables de Entorno para Docker
+
+| Variable | Descripción | Valor por Defecto |
+|----------|-------------|-------------------|
+| `SPRING_PROFILES_ACTIVE` | Perfil de Spring activo | `prod` |
+| `SPRING_DATASOURCE_URL` | URL de la base de datos | - |
+| `SPRING_DATASOURCE_USERNAME` | Usuario de la base de datos | `postgres` |
+| `SPRING_DATASOURCE_PASSWORD` | Contraseña de la base de datos | - |
+| `LANGCHAIN4J_OPEN_AI_CHAT_MODEL_API_KEY` | API Key de OpenAI | `demo` |
+| `SERVER_PORT` | Puerto del servidor | `8080` |
+
+#### Características del Dockerfile
+
+- **Multi-stage build**: Optimiza el tamaño final de la imagen
+- **Etapa 1 (Build)**: Usa Gradle 8.14.3 con JDK 21 para compilar
+- **Etapa 2 (Runtime)**: Usa Eclipse Temurin JDK 21 para ejecución
+- **Perfil de producción**: Configurado automáticamente con `-Dspring.profiles.active=prod`
+- **Puerto expuesto**: 8080
+- **Imagen optimizada**: Solo incluye el JAR final, sin dependencias de build
+
+#### Comandos Útiles de Docker
+
+```bash
+# Ver imágenes construidas
+docker images | grep movieverse
+
+# Ver contenedores en ejecución
+docker ps | grep movieverse
+
+# Acceder al shell del contenedor
+docker exec -it movieverse-app bash
+
+# Ver logs en tiempo real
+docker logs -f movieverse-app
+
+# Eliminar imagen
+docker rmi movieverse-api
+
+# Limpiar contenedores detenidos
+docker container prune
+```
+
 ## 🔧 Comandos Útiles de Gradle
 
 ```bash
