@@ -236,7 +236,20 @@ Para ejecutar las pruebas:
 ./gradlew bootJar
 ```
 
-El archivo JAR se generará en: `build/libs/movieverse-0.0.1-SNAPSHOT.jar`
+El archivo JAR se generará en: `build/libs/movieverse-1.0.0.jar`
+
+### Ejecutar el JAR
+
+```bash
+# Con perfil específico - Windows PowerShell
+java "-Dspring.profiles.active=prod" -jar build/libs/movieverse-1.0.0.jar
+
+# Con perfil específico - Unix
+java -Dspring.profiles.active=prod -jar build/libs/movieverse-1.0.0.jar
+
+# Con configuración de memoria
+java -Xmx512m -Xms256m -jar build/libs/movieverse-1.0.0.jar
+```
 
 ## 🔧 Comandos Útiles de Gradle
 
@@ -320,7 +333,6 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 ### Andrés Felipe Perdomo
 
 - GitHub: [@afperdomo2](https://github.com/afperdomo2)
-- Email: <afperdomo2@gmail.com>
 
 ---
 
