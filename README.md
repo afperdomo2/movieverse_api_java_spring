@@ -1,424 +1,394 @@
 # 🎬 Movieverse API
 
-Una API REST para la gestión de películas construida con **Spring Boot 3.5.4** y **Java 21**. Esta aplicación incluye integración con inteligencia artificial usando **LangChain4j** para generar sugerencias personalizadas de películas.
+![Java 21](https://img.shields.io/badge/Java-21-orange)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.4-6DB33F)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
-## 🚀 Características
+API REST para la gestión de películas, construida con **Spring Boot 3.5.4** y **Java 21**. Incluye CRUD, validaciones, PostgreSQL, documentación Swagger y sugerencias personalizadas con **LangChain4j/OpenAI**.
 
-- ✅ **CRUD completo de películas** (Crear, Leer, Actualizar, Eliminar)
-- 🤖 **Integración con IA** para sugerencias personalizadas usando LangChain4j y OpenAI
-- 📚 **Documentación automática** con Swagger/OpenAPI 3
-- 🗄️ **Base de datos PostgreSQL** con Docker Compose
-- 🔧 **Mapeo automático** con MapStruct
-- ✅ **Validaciones** con Bean Validation
-- 🏗️ **Arquitectura hexagonal** (Domain-driven design)
-- 🐳 **Containerización** con Docker
-- 🔄 **Hot reload** en desarrollo con DevTools
+> 🏛️ Arquitectura, capas y decisiones técnicas: [ARCHITECTURE.md](ARCHITECTURE.md)
 
-## 🛠️ Tecnologías
+## 🧭 Contenido
 
-- **Java 21**
-- **Spring Boot 3.5.4**
-- **Spring Web** - REST API
-- **Spring Data JPA** - Persistencia de datos
-- **Spring Validation** - Validación de datos
-- **PostgreSQL** - Base de datos
-- **LangChain4j** - Integración con IA
-- **OpenAI GPT-4o-mini** - Modelo de IA
-- **MapStruct 1.6.3** - Mapeo de objetos
-- **SpringDoc OpenAPI** - Documentación automática
-- **Docker Compose** - Orchestración de contenedores
-- **Gradle** - Gestión de dependencias
+**🚀 Primeros pasos**
 
-## 📋 Prerequisitos
+- [1. 🎬 Descripción general](#descripcion-general)
+- [2. 🛠️ Stack tecnológico](#stack-tecnologico)
+- [3. 📋 Prerrequisitos](#prerrequisitos)
+- [4. 🚀 Inicio rápido](#inicio-rapido)
+- [5. ☕ Java 21 en Windows 11](#java-21-windows)
 
-- **Java 21** o superior
-- **Docker** y **Docker Compose**
-- **Gradle** (incluido wrapper)
+**🛠️ Uso y operación**
 
-## 🚀 Instalación y Ejecución
+- [6. 🎯 API](#api)
+- [7. ⚙️ Configuración](#configuracion)
+- [8. 🧪 Testing](#testing)
+- [9. 📦 Despliegue](#despliegue)
+- [10. 🐛 Solución de problemas](#solucion-problemas)
 
-### 1. Clonar el repositorio
+**📦 Proyecto**
+
+- [11. 📚 Documentación adicional](#documentacion-adicional)
+- [12. 🤝 Contribuciones](#contribuciones)
+- [13. 📄 Licencia](#licencia)
+- [🏛️ Arquitectura detallada](ARCHITECTURE.md)
+
+<a id="descripcion-general"></a>
+## 1. 🎬 Descripción general
+
+Movieverse API expone un catálogo de películas y permite crear, consultar, actualizar y eliminar registros. La aplicación usa una arquitectura hexagonal: los controladores REST dependen de servicios de dominio, y la persistencia se implementa detrás de una interfaz de repositorio.
+
+**✨ Características principales**
+
+- CRUD completo de películas.
+- Validación de entrada con Bean Validation.
+- Persistencia en PostgreSQL con Spring Data JPA.
+- Mapeo entre entidades y DTOs con MapStruct.
+- Documentación interactiva con Swagger/OpenAPI.
+- Sugerencias de películas con LangChain4j y OpenAI.
+- Datos de ejemplo cargados automáticamente en desarrollo.
+- Docker Compose para la base de datos local.
+
+<a id="stack-tecnologico"></a>
+## 2. 🛠️ Stack tecnológico
+
+| Componente | Uso |
+|---|---|
+| Java 21 | Lenguaje y runtime |
+| Spring Boot 3.5.4 | Aplicación y autoconfiguración |
+| Spring Web | API REST |
+| Spring Data JPA | Persistencia |
+| Spring Validation | Validaciones |
+| PostgreSQL 16 | Base de datos |
+| LangChain4j 1.0.0-beta1 | Integración con IA |
+| OpenAI `gpt-4o-mini` | Modelo de sugerencias |
+| MapStruct 1.6.3 | Mapeo entidad/DTO |
+| SpringDoc OpenAPI 2.8.9 | Swagger UI |
+| Gradle 8.14.3 | Build y dependencias |
+| Docker Compose | PostgreSQL local |
+
+<a id="prerrequisitos"></a>
+## 3. 📋 Prerrequisitos
+
+- **JDK 21** para compilar y ejecutar. Gradle 8.14.3 requiere una JVM compatible.
+- **Docker Desktop** con Docker Compose.
+- **Gradle Wrapper** incluido en el repositorio; no hace falta instalar Gradle.
+- Opcional: VS Code con **Extension Pack for Java** y **Spring Boot Extension Pack**.
+
+Si usas Windows 11 y no tienes JDK 21, revisa la [guía de instalación](#java-21-windows). En macOS/Linux instala un JDK 21 con tu gestor de paquetes.
+
+<a id="inicio-rapido"></a>
+## 4. 🚀 Inicio rápido
+
+### 4.1 📥 Clonar el repositorio
 
 ```bash
 git clone https://github.com/afperdomo2/movieverse_api_java_spring.git
-cd movieverse
+cd movieverse_api_java_spring
 ```
 
-### 2. Configurar la base de datos
-
-Ejecutar PostgreSQL con Docker Compose:
+### 4.2 🐘 Levantar PostgreSQL
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
-Esto creará una base de datos PostgreSQL en el puerto `5434` con:
+La base local queda disponible en el puerto `5434`:
 
-- **Base de datos**: `movieverse`
-- **Usuario**: `postgres`
-- **Contraseña**: `123456`
+| Dato | Valor |
+|---|---|
+| Base de datos | `movieverse` |
+| Usuario | `postgres` |
+| Contraseña | `123456` |
 
-### 3. Limpiar y construir el proyecto
+### 4.3 🏗️ Compilar y ejecutar tests
 
-Si tienes problemas con dependencias en VS Code, ejecuta estos comandos:
+**🪟 Windows (PowerShell):**
+
+```powershell
+.\gradlew.bat clean
+.\gradlew.bat build
+```
+
+**🐧 Linux/macOS:**
 
 ```bash
-# Limpiar proyecto
 ./gradlew clean
-
-# Construir proyecto
 ./gradlew build
 ```
 
-### 4. Ejecutar la aplicación
+> `build` ejecuta los tests, y estos necesitan PostgreSQL en el puerto `5434`. Si la base no está levantada, usa `build -x test` o `compileJava` con tu wrapper.
+
+### 4.4 ▶️ Ejecutar la aplicación
+
+**🪟 Windows (PowerShell):**
+
+```powershell
+.\gradlew.bat bootRun
+```
+
+**🐧 Linux/macOS:**
 
 ```bash
 ./gradlew bootRun
 ```
 
-La aplicación estará disponible en: `http://localhost:8081/movieverse/api`
+La aplicación usa el perfil `dev` y queda disponible en:
 
-## 📊 Datos de Prueba
+- API: `http://localhost:8082/movieverse/api`
+- Swagger: `http://localhost:8082/movieverse/api/swagger-ui/index.html`
 
-La aplicación incluye datos iniciales de películas populares que se cargan automáticamente al iniciar. Incluye películas como:
+<a id="java-21-windows"></a>
+## 5. ☕ Java 21 en Windows 11 (opcional)
 
-- The Shawshank Redemption
-- The Godfather
-- The Dark Knight
-- Pulp Fiction
-- Inception
-- Y muchas más...
+Esta sección solo aplica si trabajas en Windows 11 y no tienes JDK 21. El proyecto puede convivir con otras versiones de Java; la configuración de esta guía es **solo para este repositorio**.
 
-## 📖 Documentación de la API
+### 5.1 📥 Instalar Eclipse Temurin 21
 
-Una vez que la aplicación esté ejecutándose, puedes acceder a la documentación interactiva de Swagger en:
-
-```url
-http://localhost:8081/movieverse/api/swagger-ui/index.html
+```powershell
+winget install --id EclipseAdoptium.Temurin.21.JDK --exact
 ```
 
-## 🎯 Endpoints Principales
+La instalación queda por defecto en una ruta similar a:
 
-### Películas
+```text
+C:\Program Files\Eclipse Adoptium\jdk-21.0.x-hotspot
+```
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| `GET` | `/movies` | Obtener todas las películas |
-| `GET` | `/movies/{id}` | Obtener película por ID |
-| `POST` | `/movies` | Crear nueva película |
-| `PUT` | `/movies/{id}` | Actualizar película |
-| `DELETE` | `/movies/{id}` | Eliminar película |
-| `POST` | `/movies/suggestion` | Generar sugerencias con IA |
+Puedes ver la carpeta exacta con:
 
-### Pruebas
+```powershell
+Get-ChildItem "C:\Program Files\Eclipse Adoptium"
+```
 
-| Método | Endpoint | Descripción |
-|--------|----------|-------------|
-| `GET` | `/hello` | Saludo generado con IA |
+> Algunos instaladores configuran `JAVA_HOME` globalmente. Si eso ocurre y no quieres afectar a otros proyectos, restaura el valor que tenías antes de instalar el JDK 21.
 
-## 🧠 Funcionalidad de IA
+### 5.2 ⚙️ Configurar Java 21 solo para este repositorio
 
-La aplicación incluye dos funcionalidades principales de IA:
+**Opción A — 💻 Terminal de PowerShell**
 
-### 1. Saludo Personalizado
+Cada vez que abras una terminal para trabajar en este proyecto:
 
-Genera un saludo de bienvenida personalizado para la plataforma.
+```powershell
+# Reemplaza la ruta por tu carpeta real de Temurin 21
+$env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-21.0.x-hotspot"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+```
 
-### 2. Sugerencias de Películas
+Esto solo afecta a esa terminal; no cambia la configuración global de Java.
 
-Basado en las preferencias del usuario, la IA recomienda hasta 3 películas de la base de datos.
+**Opción B — 🧩 VS Code**
 
-**Ejemplo de solicitud:**
+Crea `.vscode/settings.json` en la raíz del proyecto. Esa carpeta está en `.gitignore`, así que la configuración no se sube y solo aplica a este workspace:
 
 ```json
 {
-  "userPreferences": "Me gustan las películas de ciencia ficción y acción con efectos especiales"
+  "java.jdt.ls.java.home": "C:/Program Files/Eclipse Adoptium/jdk-21.0.x-hotspot",
+  "java.import.gradle.java.home": "C:/Program Files/Eclipse Adoptium/jdk-21.0.x-hotspot",
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-21",
+      "path": "C:/Program Files/Eclipse Adoptium/jdk-21.0.x-hotspot",
+      "default": true
+    }
+  ]
 }
 ```
 
-## 🏗️ Arquitectura del Proyecto
+Ajusta la ruta si tu versión es distinta y recarga VS Code con `Ctrl+Shift+P` → **Developer: Reload Window**.
+
+> **No** configures `JAVA_HOME` al JDK 21 a nivel `"User"` o `"Machine"`: afectaría a todos los proyectos. La configuración del JDK 21 debe quedar limitada a este repositorio.
+
+### 5.3 ✅ Verificar
+
+```powershell
+.\gradlew.bat --version
+```
+
+Debe indicar `Launcher JVM: 21...`. En la Opción B, `java -version` puede seguir mostrando otra versión porque el `PATH` del sistema no cambia; lo importante es que Gradle use el JDK 21.
+
+<a id="api"></a>
+## 6. 🎯 API
+
+La documentación interactiva está disponible en Swagger:
 
 ```text
-src/main/java/com/afperdomo2/movieverse/
-├── 📁 domain/                 # Lógica de negocio
-│   ├── 📁 dto/               # Data Transfer Objects
-│   ├── 📁 repository/        # Interfaces de repositorio
-│   └── 📁 service/           # Servicios de dominio
-├── 📁 persistence/           # Capa de persistencia
-│   ├── 📁 crud/             # Repositorios CRUD
-│   ├── 📁 entity/           # Entidades JPA
-│   ├── 📁 mapper/           # Mappers MapStruct
-│   └── 📁 repository/       # Implementaciones de repositorio
-└── 📁 web/                  # Capa de presentación
-    └── 📁 controller/       # Controladores REST
+http://localhost:8082/movieverse/api/swagger-ui/index.html
 ```
 
-## 🎭 DTOs Principales
+Las rutas son relativas al contexto `/movieverse/api`:
 
-### MovieDto
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/movies` | Listar películas |
+| `GET` | `/movies/{id}` | Obtener una película |
+| `POST` | `/movies` | Crear una película |
+| `PUT` | `/movies/{id}` | Actualizar una película |
+| `DELETE` | `/movies/{id}` | Eliminar una película |
+| `POST` | `/movies/suggestion` | Generar sugerencias con IA |
+| `GET` | `/hello` | Saludo generado con IA |
 
-Representa una película completa con todos sus datos.
+Ejemplo de sugerencia:
 
-### CreateMovieDto
-
-DTO para crear nuevas películas con validaciones:
-
-- Título obligatorio
-- Duración mayor a 0
-- Fecha de lanzamiento no futura
-- Calificación entre 0 y 9
-
-### UpdateMovieDto
-
-DTO para actualizar películas existentes (título, fecha y calificación).
-
-### SuggestionRequestDto
-
-DTO para solicitudes de sugerencias de IA.
-
-## 🗄️ Modelo de Base de Datos
-
-### Tabla: movies
-
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `id` | BIGINT | Identificador único (autoincremental) |
-| `title` | VARCHAR | Título de la película (único) |
-| `duration` | INTEGER | Duración en minutos |
-| `genre` | VARCHAR(50) | Género de la película |
-| `release_date` | DATE | Fecha de lanzamiento |
-| `rating` | DECIMAL(3,2) | Calificación (0.00 - 9.99) |
-| `status` | VARCHAR(1) | Estado ('A'=Activo, 'D'=Disponible) |
-
-## ⚙️ Configuración
-
-### Perfiles de Aplicación
-
-- **dev** (por defecto): Configuración de desarrollo
-- **prod**: Configuración de producción
-
-### Variables de Entorno Importantes
-
-```properties
-# Base de datos
-spring.datasource.url=jdbc:postgresql://localhost:5434/movieverse
-spring.datasource.username=postgres
-spring.datasource.password=123456
-
-# IA (LangChain4j)
-langchain4j.open-ai.chat-model.api-key=demo
-langchain4j.open-ai.chat-model.model-name=gpt-4o-mini
-
-# Servidor
-server.port=8081
-server.servlet.context-path=/movieverse/api
+```json
+{
+  "userPreferences": "Me gustan la ciencia ficción y la acción con efectos especiales"
+}
 ```
 
-## 🧪 Testing
+<a id="configuracion"></a>
+## 7. ⚙️ Configuración
 
-Para ejecutar las pruebas:
+### 7.1 🧩 Perfiles
+
+- `dev` (por defecto): PostgreSQL local en `5434`, puerto `8082`, `ddl-auto=update` y carga de `data.sql`.
+- `prod`: puerto `8080` y configuración de base de datos externa.
+
+### 7.2 🔑 Variables y propiedades relevantes
+
+| Propiedad / variable | Uso |
+|---|---|
+| `server.port` | `8081` en la configuración base; `dev` lo sobrescribe a `8082` y `prod` a `8080` |
+| `spring.datasource.url` | Conexión JDBC a PostgreSQL |
+| `spring.datasource.username` / `password` | Credenciales de la base |
+| `spring.jpa.hibernate.ddl-auto` | Actualización automática del esquema (`update` en dev/prod) |
+| `langchain4j.open-ai.chat-model.api-key` | API key de OpenAI; por defecto `demo` |
+| `LANGCHAIN4J_OPEN_AI_CHAT_MODEL_API_KEY` | Variable de entorno para una key real |
+
+No agregues claves ni credenciales reales a archivos versionados. Usa variables de entorno.
+
+<a id="testing"></a>
+## 8. 🧪 Testing
+
+Los tests levantan el contexto completo y requieren PostgreSQL en `5434`.
+
+**🪟 Windows (PowerShell):**
+
+```powershell
+docker compose up -d
+.\gradlew.bat test
+```
+
+**🐧 Linux/macOS:**
 
 ```bash
+docker compose up -d
 ./gradlew test
 ```
 
-## 🚀 Despliegue
+Ejecutar un único test:
 
-### Construcción para Producción
-
-```bash
-./gradlew clean build -Pprod
+```powershell
+.\gradlew.bat test --tests "com.afperdomo2.movieverse.MovieverseApplicationTests"
 ```
 
-### Generar JAR
+Para una verificación rápida sin base de datos:
 
-```bash
-./gradlew bootJar
+```powershell
+.\gradlew.bat compileJava
 ```
 
-El archivo JAR se generará en: `build/libs/movieverse-1.0.0.jar`
+<a id="despliegue"></a>
+## 9. 📦 Despliegue
 
-### Ejecutar el JAR
+### 9.1 📦 Generar el JAR
 
-```bash
-# Con perfil específico - Windows PowerShell
+```powershell
+.\gradlew.bat clean build
+.\gradlew.bat bootJar
+```
+
+El JAR se genera en `build/libs/movieverse-1.0.0.jar`.
+
+### 9.2 ▶️ Ejecutar el JAR
+
+**🪟 Windows (PowerShell):**
+
+```powershell
 java "-Dspring.profiles.active=prod" -jar build/libs/movieverse-1.0.0.jar
-
-# Con perfil específico - Unix
-java -Dspring.profiles.active=prod -jar build/libs/movieverse-1.0.0.jar
-
-# Con configuración de memoria
-java -Xmx512m -Xms256m -jar build/libs/movieverse-1.0.0.jar
 ```
 
-### 🐳 Despliegue con Docker
-
-La aplicación incluye un `Dockerfile` optimizado con **multi-stage build** para despliegue en producción:
-
-#### Construcción de la Imagen Docker
+**🐧 Linux/macOS:**
 
 ```bash
-# Construir la imagen Docker
+java -Dspring.profiles.active=prod -jar build/libs/movieverse-1.0.0.jar
+```
+
+### 9.3 🐳 Docker
+
+```bash
 docker build -t movieverse-api .
 
-# Construir con un tag específico
-docker build -t movieverse-api:1.0.0 .
-```
-
-#### Ejecutar el Contenedor
-
-```bash
-# Ejecutar el contenedor (requiere base de datos externa)
 docker run -d \
   --name movieverse-app \
   -p 8080:8080 \
   -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5434/movieverse \
   -e SPRING_DATASOURCE_USERNAME=postgres \
   -e SPRING_DATASOURCE_PASSWORD=123456 \
-  -e LANGCHAIN4J_OPEN_AI_CHAT_MODEL_API_KEY=tu_api_key_aqui \
+  -e LANGCHAIN4J_OPEN_AI_CHAT_MODEL_API_KEY=tu_api_key \
   movieverse-api
 ```
 
-#### Despliegue Completo con Docker Compose
+El `docker-compose.yaml` del repositorio **solo levanta PostgreSQL**; no inicia la aplicación. Para desarrollo local usa `bootRun`; para producción construye la imagen con el `Dockerfile`.
 
-Para un despliegue completo con base de datos incluida:
+<a id="solucion-problemas"></a>
+## 10. 🐛 Solución de problemas
+
+### 10.1 ❌ Error `Unsupported class file major version 69`
+
+Gradle está usando una versión de Java distinta de 21. Verifica:
+
+```powershell
+.\gradlew.bat --version
+```
+
+Debe mostrar `Launcher JVM: 21...`. Si no, configura `JAVA_HOME` con un JDK 21 o revisa la [guía de Windows 11](#java-21-windows).
+
+### 10.2 🐘 No conecta con PostgreSQL
+
+Comprueba el contenedor:
 
 ```bash
-# Iniciar todos los servicios (base de datos + aplicación)
-docker-compose up -d
-
-# Ver logs de la aplicación
-docker-compose logs -f movieverse-app
-
-# Detener todos los servicios
-docker-compose down
+docker compose ps
+docker compose up -d
 ```
 
-#### Variables de Entorno para Docker
+La aplicación espera PostgreSQL en `localhost:5434`.
 
-| Variable | Descripción | Valor por Defecto |
-|----------|-------------|-------------------|
-| `SPRING_PROFILES_ACTIVE` | Perfil de Spring activo | `prod` |
-| `SPRING_DATASOURCE_URL` | URL de la base de datos | - |
-| `SPRING_DATASOURCE_USERNAME` | Usuario de la base de datos | `postgres` |
-| `SPRING_DATASOURCE_PASSWORD` | Contraseña de la base de datos | - |
-| `LANGCHAIN4J_OPEN_AI_CHAT_MODEL_API_KEY` | API Key de OpenAI | `demo` |
-| `SERVER_PORT` | Puerto del servidor | `8080` |
+### 10.3 🤖 La IA devuelve error 500
 
-#### Características del Dockerfile
+Los endpoints `/hello` y `/movies/suggestion` necesitan una API key real. Configúrala antes de arrancar:
 
-- **Multi-stage build**: Optimiza el tamaño final de la imagen
-- **Etapa 1 (Build)**: Usa Gradle 8.14.3 con JDK 21 para compilar
-- **Etapa 2 (Runtime)**: Usa Eclipse Temurin JDK 21 para ejecución
-- **Perfil de producción**: Configurado automáticamente con `-Dspring.profiles.active=prod`
-- **Puerto expuesto**: 8080
-- **Imagen optimizada**: Solo incluye el JAR final, sin dependencias de build
-
-#### Comandos Útiles de Docker
-
-```bash
-# Ver imágenes construidas
-docker images | grep movieverse
-
-# Ver contenedores en ejecución
-docker ps | grep movieverse
-
-# Acceder al shell del contenedor
-docker exec -it movieverse-app bash
-
-# Ver logs en tiempo real
-docker logs -f movieverse-app
-
-# Eliminar imagen
-docker rmi movieverse-api
-
-# Limpiar contenedores detenidos
-docker container prune
+```powershell
+$env:LANGCHAIN4J_OPEN_AI_CHAT_MODEL_API_KEY = "tu_api_key"
+.\gradlew.bat bootRun
 ```
 
-## 🔧 Comandos Útiles de Gradle
+El CRUD funciona sin clave de IA.
 
-```bash
-# Limpiar proyecto (útil cuando hay problemas con dependencias en VS Code)
-./gradlew clean
+### 10.4 🧰 Problemas con dependencias en VS Code
 
-# Construir proyecto
-./gradlew build
-
-# Ejecutar aplicación
-./gradlew bootRun
-
-# Ejecutar tests
-./gradlew test
-
-# Generar JAR ejecutable
-./gradlew bootJar
-
-# Ver dependencias
-./gradlew dependencies
-
-# Verificar actualizaciones de dependencias
-./gradlew dependencyUpdates
+```powershell
+.\gradlew.bat clean
+.\gradlew.bat build
 ```
 
-## 🐛 Solución de Problemas
+Luego recarga VS Code con `Ctrl+Shift+P` → **Developer: Reload Window**. Si persiste, ejecuta **Java: Clean Java Language Server Workspace**.
 
-### Problemas con Dependencias en VS Code
+<a id="documentacion-adicional"></a>
+## 11. 📚 Documentación adicional
 
-Si tienes problemas con las dependencias en VS Code, ejecuta:
+- [ARCHITECTURE.md](ARCHITECTURE.md): capas, flujos, modelo de datos, integración con IA y decisiones técnicas.
+- [AGENTS.md](AGENTS.md): instrucciones para agentes de código que trabajen en el repositorio.
+- Swagger UI: `http://localhost:8082/movieverse/api/swagger-ui/index.html`.
 
-```bash
-./gradlew clean
-./gradlew build
-```
+<a id="contribuciones"></a>
+## 12. 🤝 Contribuciones
 
-Luego reinicia VS Code o recarga la ventana (`Ctrl+Shift+P` > "Developer: Reload Window").
+Las contribuciones son bienvenidas. Abre un issue o un pull request describiendo el cambio. Para cambios grandes, crea una rama desde `main`.
 
-### Error de Conexión a Base de Datos
+<a id="licencia"></a>
+## 13. 📄 Licencia
 
-Asegúrate de que PostgreSQL esté ejecutándose:
-
-```bash
-docker-compose ps
-```
-
-Si no está activo:
-
-```bash
-docker-compose up -d
-```
-
-### Problemas con la API Key de OpenAI
-
-La aplicación usa una API key de demo. Para usar tu propia key:
-
-1. Obtén una API key de OpenAI
-2. Modifica `application.properties`:
-
-```properties
-langchain4j.open-ai.chat-model.api-key=tu_api_key_aqui
-```
-
-## 🤝 Contribuciones
-
-Las contribuciones son bienvenidas. Por favor:
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -m 'Agregar nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Abre un Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
-## 👨‍💻 Autor
-
-### Andrés Felipe Perdomo
-
-- GitHub: [@afperdomo2](https://github.com/afperdomo2)
-
----
-
-⭐ Si este proyecto te fue útil, ¡no olvides darle una estrella!
+Este proyecto está bajo la licencia MIT.
