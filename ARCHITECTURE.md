@@ -168,9 +168,15 @@ La entidad `MovieEntity` se mapea a la tabla `movies`:
 | `release_date` | `DATE` | Obligatorio |
 | `rating` | `DECIMAL(3,2)` | Puede ser nulo |
 | `status` | `VARCHAR(1)` | `A` en datos iniciales; `D` al crear desde la API |
+| `version` | `BIGINT` | Bloqueo optimista (`@Version`), por defecto `0` |
+| `created_at` | `TIMESTAMP WITH TIME ZONE` | Auditoría, no se modifica tras crear |
+| `updated_at` | `TIMESTAMP WITH TIME ZONE` | Auditoría, se actualiza en cada cambio |
 
 Reglas relevantes:
 
+- La auditoría usa Spring Data JPA (`@CreatedDate`/`@LastModifiedDate` + `@EnableJpaAuditing`). Las columnas son `NOT NULL DEFAULT now()` para que `ddl-auto=update` pueda añadirlas sobre tablas con datos.
+- `version` implementa bloqueo optimista: Hibernate lo incrementa en cada actualización y lanza `OptimisticLockException` si hay conflicto.
+- La entidad usa Lombok (`@Getter`, `@Setter`, `@NoArgsConstructor`); no se usa `@Data` para evitar `equals`/`hashCode`/`toString` inadecuados en JPA.
 - `create` fuerza `status = "D"` sin importar el valor enviado.
 - Un título duplicado lanza `MovieAlreadyExistsException` → HTTP 409.
 - Un ID inexistente lanza `MovieNotFoundException` → HTTP 404.

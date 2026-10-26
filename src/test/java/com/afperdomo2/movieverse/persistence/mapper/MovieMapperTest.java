@@ -3,6 +3,7 @@ package com.afperdomo2.movieverse.persistence.mapper;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -82,6 +83,18 @@ class MovieMapperTest {
     }
 
     @Test
+    @DisplayName("toEntity no establece los campos de auditoría ni la versión")
+    void toEntity_doesNotSetAuditOrVersionFields() {
+        MovieDto dto = new MovieDto(1L, "Interstellar", 169, "Sci-Fi", RELEASE_DATE, "D", 8.6, "VERY_GOOD");
+
+        MovieEntity entity = mapper.toEntity(dto);
+
+        assertThat(entity.getVersion()).isNull();
+        assertThat(entity.getCreatedAt()).isNull();
+        assertThat(entity.getUpdatedAt()).isNull();
+    }
+
+    @Test
     @DisplayName("createEntityFromDto copia todos los campos, incluido el estado enviado")
     void createEntityFromDto_mapsAllFields() {
         CreateMovieDto dto = new CreateMovieDto(7L, "Interstellar", 169, "Sci-Fi", RELEASE_DATE, 8.6, "A");
@@ -110,6 +123,24 @@ class MovieMapperTest {
     }
 
     @Test
+    @DisplayName("createEntityFromDto preserva la auditoría y la versión de una entidad existente")
+    void createEntityFromDto_preservesAuditAndVersionFields() {
+        MovieEntity entity = movieEntity();
+        Instant createdAt = Instant.parse("2026-01-01T10:00:00Z");
+        Instant updatedAt = Instant.parse("2026-01-02T10:00:00Z");
+        entity.setCreatedAt(createdAt);
+        entity.setUpdatedAt(updatedAt);
+        entity.setVersion(3L);
+
+        mapper.createEntityFromDto(
+                new CreateMovieDto(null, "Interstellar", 169, "Sci-Fi", RELEASE_DATE, 8.6, null), entity);
+
+        assertThat(entity.getCreatedAt()).isEqualTo(createdAt);
+        assertThat(entity.getUpdatedAt()).isEqualTo(updatedAt);
+        assertThat(entity.getVersion()).isEqualTo(3L);
+    }
+
+    @Test
     @DisplayName("updateEntityFromDto solo actualiza título, fecha y calificación")
     void updateEntityFromDto_updatesOnlyMappedFields() {
         MovieEntity entity = movieEntity();
@@ -133,6 +164,23 @@ class MovieMapperTest {
         mapper.updateEntityFromDto(new UpdateMovieDto("Interstellar", RELEASE_DATE, null), entity);
 
         assertThat(entity.getRating()).isNull();
+    }
+
+    @Test
+    @DisplayName("updateEntityFromDto preserva la auditoría y la versión de una entidad existente")
+    void updateEntityFromDto_preservesAuditAndVersionFields() {
+        MovieEntity entity = movieEntity();
+        Instant createdAt = Instant.parse("2026-01-01T10:00:00Z");
+        Instant updatedAt = Instant.parse("2026-01-02T10:00:00Z");
+        entity.setCreatedAt(createdAt);
+        entity.setUpdatedAt(updatedAt);
+        entity.setVersion(3L);
+
+        mapper.updateEntityFromDto(new UpdateMovieDto("Interstellar Remastered", RELEASE_DATE, 9.0), entity);
+
+        assertThat(entity.getCreatedAt()).isEqualTo(createdAt);
+        assertThat(entity.getUpdatedAt()).isEqualTo(updatedAt);
+        assertThat(entity.getVersion()).isEqualTo(3L);
     }
 
     private static MovieEntity movieEntity() {

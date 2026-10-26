@@ -1,26 +1,42 @@
 package com.afperdomo2.movieverse.persistence.entity;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
+
+import org.hibernate.annotations.ColumnDefault;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "movies")
+@EntityListeners(AuditingEntityListener.class)
+@Getter
+@Setter
+@NoArgsConstructor
 public class MovieEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 255)
     private String title;
 
-    @Column(nullable = false, precision = 3)
+    @Column(nullable = false)
     private Integer duration;
 
     @Column(nullable = false, length = 50)
@@ -35,59 +51,18 @@ public class MovieEntity {
     @Column(nullable = false, length = 1)
     private String status;
 
-    public Long getId() {
-        return id;
-    }
+    @Version
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Long version;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @ColumnDefault("now()")
+    private Instant createdAt;
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public String getGenre() {
-        return genre;
-    }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
-
-    public LocalDate getReleaseDate() {
-        return releaseDate;
-    }
-
-    public void setReleaseDate(LocalDate releaseDate) {
-        this.releaseDate = releaseDate;
-    }
-
-    public BigDecimal getRating() {
-        return rating;
-    }
-
-    public void setRating(BigDecimal rating) {
-        this.rating = rating;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    @ColumnDefault("now()")
+    private Instant updatedAt;
 }

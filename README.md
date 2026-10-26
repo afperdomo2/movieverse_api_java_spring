@@ -64,6 +64,7 @@ Movieverse API expone un catálogo de películas y permite crear, consultar, act
 | Spring AI 1.1.8 | Integración con IA |
 | OpenAI `gpt-4o-mini` | Modelo de sugerencias |
 | MapStruct 1.6.3 | Mapeo entidad/DTO |
+| Lombok 1.18.38 | Getters/setters de entidades |
 | SpringDoc OpenAPI 2.8.9 | Swagger UI |
 | Gradle 8.14.3 | Build y dependencias |
 | Docker Compose | PostgreSQL local |

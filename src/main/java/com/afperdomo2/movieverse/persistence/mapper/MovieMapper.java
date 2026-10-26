@@ -27,12 +27,21 @@ public interface MovieMapper {
     List<MovieDto> toDto(Iterable<MovieEntity> entities);
 
     @InheritInverseConfiguration
+    @Mapping(target = "version", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     MovieEntity toEntity(MovieDto dto);
 
     @Mapping(target = "title", source = "title")
     @Mapping(target = "releaseDate", source = "releaseDate")
     @Mapping(target = "rating", source = "rating")
+    @Mapping(target = "version", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     void updateEntityFromDto(UpdateMovieDto updateMovieDto, @MappingTarget MovieEntity entity);
 
+    @Mapping(target = "version", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     void createEntityFromDto(CreateMovieDto createMovieDto, @MappingTarget MovieEntity entity);
 }
