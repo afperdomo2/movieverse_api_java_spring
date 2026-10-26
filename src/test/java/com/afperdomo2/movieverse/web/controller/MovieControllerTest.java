@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
 import com.afperdomo2.movieverse.domain.dto.SuggestionRequestDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.service.MovieService;
@@ -112,6 +114,21 @@ class MovieControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNull();
+    }
+
+    @Test
+    @DisplayName("patch devuelve 200 con la película actualizada")
+    void patch_returnsOkWithUpdatedMovie() {
+        PatchMovieDto changes = new PatchMovieDto(Optional.of("Interstellar Remastered"), Optional.empty(),
+                Optional.of(9.0));
+        MovieDto updated = movieDto(1L, "Interstellar Remastered");
+        when(movieService.patch(1L, changes)).thenReturn(updated);
+
+        ResponseEntity<MovieDto> response = movieController.patch(1L, changes);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(updated);
+        verify(movieService).patch(1L, changes);
     }
 
     @Test

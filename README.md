@@ -226,6 +226,7 @@ Las rutas son relativas al contexto `/movieverse/api`:
 | `GET` | `/movies/{id}` | Obtener una película |
 | `POST` | `/movies` | Crear una película |
 | `PUT` | `/movies/{id}` | Actualizar una película |
+| `PATCH` | `/movies/{id}` | Actualizar parcialmente una película |
 | `DELETE` | `/movies/{id}` | Eliminar una película |
 | `POST` | `/movies/suggestion` | Generar sugerencias con IA |
 | `GET` | `/hello` | Saludo generado con IA |
@@ -237,6 +238,19 @@ Ejemplo de sugerencia:
   "userPreferences": "Me gustan la ciencia ficción y la acción con efectos especiales"
 }
 ```
+
+Ejemplo de actualización parcial:
+
+```http
+PATCH /movieverse/api/movies/1
+Content-Type: application/json
+
+{
+  "rating": 9.0
+}
+```
+
+> El PATCH solo modifica los campos enviados. Un body vacío devuelve `400`; los campos omitidos o enviados como `null` se dejan como están.
 
 <a id="configuracion"></a>
 ## 7. ⚙️ Configuración

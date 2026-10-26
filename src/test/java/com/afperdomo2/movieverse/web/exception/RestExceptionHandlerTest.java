@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.exception.MovieAlreadyExistsException;
 import com.afperdomo2.movieverse.domain.exception.MovieNotFoundException;
+import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
 
 class RestExceptionHandlerTest {
 
@@ -42,6 +44,17 @@ class RestExceptionHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody()).isEqualTo(
                 new Error("MovieAlreadyExists", "La película con el título 'Interstellar' ya existe."));
+    }
+
+    @Test
+    @DisplayName("Un conflicto de bloqueo optimista se traduce a 409")
+    void handleOptimisticLock_returnsConflict() {
+        ResponseEntity<Error> response = handler.handleOptimisticLock(
+                new ObjectOptimisticLockingFailureException(MovieEntity.class, 1L));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody()).isEqualTo(new Error("OptimisticLockingFailure",
+                "La película fue modificada por otra operación. Vuelve a intentarlo."));
     }
 
     @Test

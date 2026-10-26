@@ -1,11 +1,14 @@
 package com.afperdomo2.movieverse.persistence.repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.exception.MovieAlreadyExistsException;
 import com.afperdomo2.movieverse.domain.exception.MovieNotFoundException;
@@ -62,6 +65,37 @@ public class MovieEntityRepository implements MovieRepository {
         this.movieMapper.updateEntityFromDto(changes, movie);
         this.crudMovieEntity.save(movie);
         return this.movieMapper.toDto(movie);
+    }
+
+    @Override
+    @Transactional
+    public MovieDto patch(long id, PatchMovieDto changes) {
+        MovieEntity movie = this.crudMovieEntity.findById(id).orElse(null);
+        if (movie == null) {
+            throw new MovieNotFoundException(id);
+        }
+
+        if (changes.title().isEmpty() && changes.releaseDate().isEmpty() && changes.rating().isEmpty()) {
+            return this.movieMapper.toDto(movie);
+        }
+
+        changes.title().ifPresent(title -> updateTitle(id, movie, title));
+        changes.releaseDate().ifPresent(movie::setReleaseDate);
+        changes.rating().ifPresent(rating -> movie.setRating(BigDecimal.valueOf(rating)));
+
+        this.crudMovieEntity.save(movie);
+        return this.movieMapper.toDto(movie);
+    }
+
+    private void updateTitle(long id, MovieEntity movie, String title) {
+        if (title.equals(movie.getTitle())) {
+            return;
+        }
+        MovieEntity existing = this.crudMovieEntity.findByTitle(title);
+        if (existing != null && !existing.getId().equals(id)) {
+            throw new MovieAlreadyExistsException(title);
+        }
+        movie.setTitle(title);
     }
 
     @Override

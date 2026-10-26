@@ -45,7 +45,8 @@ API REST de películas con **Spring Boot 3.5.4** y **Java 21**, CRUD y sugerenci
 - DTOs en `domain/dto`; mappers MapStruct en `persistence/mapper`.
 - Para añadir un campo u operación CRUD: DTO, `MovieRepository`, `MovieEntityRepository`, `MovieMapper` y `MovieController`.
 - La lógica de persistencia vive en `MovieEntityRepository`: ID inexistente → 404; título duplicado → 409; `create` fuerza `status="D"`.
-- `RestExceptionHandler` traduce las excepciones de dominio; los null checks de los controladores son código muerto.
+- `PATCH /movies/{id}` usa `PatchMovieDto` con `Optional`: solo actualiza los campos enviados, body vacío → 400, título duplicado → 409 y la operación es `@Transactional`.
+- `RestExceptionHandler` traduce las excepciones de dominio y `ObjectOptimisticLockingFailureException` → 409; los null checks de los controladores son código muerto.
 - `RatingMapper` calcula `ratingString`; los umbrales están en esa clase.
 - `MovieEntity` usa Lombok (`@Getter`, `@Setter`, `@NoArgsConstructor`; nunca `@Data`) y auditoría con `@CreatedDate`/`@LastModifiedDate` + `@EnableJpaAuditing` en `config/JpaAuditingConfig`.
 - `version` es un `@Version` para bloqueo optimista; las columnas de auditoría usan `NOT NULL DEFAULT now()` para sobrevivir a `ddl-auto=update`.

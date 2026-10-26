@@ -133,6 +133,7 @@ sequenceDiagram
 | `MovieDto` | Respuesta completa de una película |
 | `CreateMovieDto` | Entrada para crear; incluye validaciones |
 | `UpdateMovieDto` | Entrada para actualizar título, fecha y rating |
+| `PatchMovieDto` | Entrada para actualizar parcialmente título, fecha y rating; usa `Optional` |
 | `SuggestionRequestDto` | Preferencias del usuario para generar sugerencias |
 
 ### Validaciones de creación
@@ -178,6 +179,8 @@ Reglas relevantes:
 - `version` implementa bloqueo optimista: Hibernate lo incrementa en cada actualización y lanza `OptimisticLockException` si hay conflicto.
 - La entidad usa Lombok (`@Getter`, `@Setter`, `@NoArgsConstructor`); no se usa `@Data` para evitar `equals`/`hashCode`/`toString` inadecuados en JPA.
 - `create` fuerza `status = "D"` sin importar el valor enviado.
+- `update` (PUT) actualiza título, fecha y rating; los campos omitidos se guardan como `null`.
+- `patch` (PATCH) usa `PatchMovieDto` con `Optional` y solo modifica los campos presentes. Un body vacío devuelve 400; un título duplicado devuelve 409; la operación es `@Transactional`.
 - Un título duplicado lanza `MovieAlreadyExistsException` → HTTP 409.
 - Un ID inexistente lanza `MovieNotFoundException` → HTTP 404.
 - `data.sql` inserta películas de ejemplo solo si la tabla está vacía.

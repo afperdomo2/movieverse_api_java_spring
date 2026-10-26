@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.exception.MovieNotFoundException;
 import com.afperdomo2.movieverse.domain.repository.MovieRepository;
@@ -93,6 +95,17 @@ class MovieServiceTest {
 
         assertThat(movieService.update(1L, changes)).isEqualTo(updated);
         verify(movieRepository).update(1L, changes);
+    }
+
+    @Test
+    @DisplayName("patch delega en el repositorio")
+    void patch_delegatesToRepository() {
+        PatchMovieDto changes = new PatchMovieDto(Optional.of("Interstellar"), Optional.empty(), Optional.of(9.0));
+        MovieDto updated = movieDto(1L, "Interstellar");
+        when(movieRepository.patch(1L, changes)).thenReturn(updated);
+
+        assertThat(movieService.patch(1L, changes)).isEqualTo(updated);
+        verify(movieRepository).patch(1L, changes);
     }
 
     @Test

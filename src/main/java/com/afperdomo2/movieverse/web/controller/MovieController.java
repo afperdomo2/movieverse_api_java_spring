@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
 import com.afperdomo2.movieverse.domain.dto.SuggestionRequestDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.service.MovieService;
@@ -85,6 +87,19 @@ public class MovieController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(updatedMovie);
+    }
+
+    @PatchMapping("/{id}")
+    @Operation(summary = "Actualizar parcialmente una película", description = "Actualiza solo los campos enviados", responses = {
+            @ApiResponse(responseCode = "200", description = "Película actualizada"),
+            @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content()),
+            @ApiResponse(responseCode = "404", description = "Película no encontrada", content = @Content()),
+            @ApiResponse(responseCode = "409", description = "Conflicto en la solicitud", content = @Content())
+    })
+    public ResponseEntity<MovieDto> patch(
+            @Parameter(description = "Identificador de la película", example = "1") @PathVariable("id") long id,
+            @RequestBody @Valid PatchMovieDto changes) {
+        return ResponseEntity.ok(this.movieService.patch(id, changes));
     }
 
     @DeleteMapping("/{id}")

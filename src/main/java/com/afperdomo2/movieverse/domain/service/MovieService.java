@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.repository.MovieRepository;
 
@@ -34,6 +35,10 @@ public class MovieService {
 
     public MovieDto update(long id, UpdateMovieDto changes) {
         return this.movieRepository.update(id, changes);
+    }
+
+    public MovieDto patch(long id, PatchMovieDto changes) {
+        return this.movieRepository.patch(id, changes);
     }
 
     public boolean delete(long id) {
