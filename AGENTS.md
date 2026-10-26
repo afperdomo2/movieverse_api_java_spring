@@ -17,22 +17,26 @@ API REST de películas con **Spring Boot 3.5.4** y **Java 21**, CRUD y sugerenci
 - **Swagger:** `http://localhost:8082/movieverse/api/swagger-ui/index.html`.
 - **PostgreSQL local:** `docker compose up -d` levanta solo PostgreSQL 16 en el puerto `5434` (`movieverse` / `postgres` / `123456`). El compose no inicia la aplicación.
 - `spring-boot-docker-compose` está en el classpath de desarrollo, así que `bootRun` gestiona los servicios del compose; Docker debe estar en ejecución.
-- **`build` y `test` necesitan PostgreSQL levantado**, porque el test arranca el contexto completo.
+- **`build` y `test` no necesitan PostgreSQL**: por defecto solo se ejecutan pruebas unitarias. `integrationTest` sí requiere la base levantada.
 
 ## Tests
 
-- Solo existe `MovieverseApplicationTests.contextLoads` con `@SpringBootTest`; no hay H2 ni Testcontainers.
-- Flujo:
+- **Unitarios (por defecto):** JUnit 5 + Mockito + AssertJ; sin contexto Spring, sin PostgreSQL y sin llamadas a OpenAI. Cubren servicios, repositorio, mappers, controladores, `RestExceptionHandler`, validación de DTOs y `MovieverseAiService`.
+  ```powershell
+  .\gradlew.bat test
+  ```
+- **Integración:** `MovieverseApplicationTests.contextLoads` está anotado con `@Tag("integration")` y se ejecuta aparte:
   ```powershell
   docker compose up -d
-  .\gradlew.bat test
+  .\gradlew.bat integrationTest
   ```
 - Test individual:
   ```powershell
-  .\gradlew.bat test --tests "com.afperdomo2.movieverse.MovieverseApplicationTests"
+  .\gradlew.bat test --tests "com.afperdomo2.movieverse.domain.service.MovieServiceTest"
   ```
-- Verificación rápida sin base de datos: `.\gradlew.bat compileJava`.
+- Verificación rápida sin compilar tests: `.\gradlew.bat compileJava`.
 - Si MapStruct no refleja cambios, ejecuta `.\gradlew.bat clean` y recompila.
+- No añadas `@SpringBootTest` a los tests unitarios; si un test necesita contexto o base de datos, etiquétalo con `@Tag("integration")`.
 
 ## Arquitectura
 

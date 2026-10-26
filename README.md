@@ -118,7 +118,7 @@ La base local queda disponible en el puerto `5434`:
 ./gradlew build
 ```
 
-> `build` ejecuta los tests, y estos necesitan PostgreSQL en el puerto `5434`. Si la base no está levantada, usa `build -x test` o `compileJava` con tu wrapper.
+> `build` ejecuta los tests unitarios y no necesita PostgreSQL. Los tests de integración se ejecutan aparte con `integrationTest` (ver [sección 8](#testing)).
 
 ### 4.4 ▶️ Ejecutar la aplicación
 
@@ -275,33 +275,31 @@ No agregues claves ni credenciales reales a archivos versionados. Usa variables 
 <a id="testing"></a>
 ## 8. 🧪 Testing
 
-Los tests levantan el contexto completo y requieren PostgreSQL en `5434`.
+Los tests están separados en dos grupos:
 
-**🪟 Windows (PowerShell):**
+- **Unitarios** (por defecto): JUnit 5, Mockito y AssertJ. No levantan el contexto de Spring, no usan PostgreSQL y no llaman a OpenAI.
+- **Integración** (`@Tag("integration")`): levantan el contexto completo y requieren PostgreSQL en `5434`.
+
+**Unitarios (sin base de datos):**
 
 ```powershell
-docker compose up -d
 .\gradlew.bat test
 ```
 
-**🐧 Linux/macOS:**
+**Integración (requiere PostgreSQL):**
 
-```bash
+```powershell
 docker compose up -d
-./gradlew test
+.\gradlew.bat integrationTest
 ```
 
-Ejecutar un único test:
+Ejecutar un único test unitario:
 
 ```powershell
-.\gradlew.bat test --tests "com.afperdomo2.movieverse.MovieverseApplicationTests"
+.\gradlew.bat test --tests "com.afperdomo2.movieverse.domain.service.MovieServiceTest"
 ```
 
-Para una verificación rápida sin base de datos:
-
-```powershell
-.\gradlew.bat compileJava
-```
+> `build` solo ejecuta los tests unitarios. Para una verificación rápida sin compilar tests: `.\gradlew.bat compileJava`.
 
 <a id="despliegue"></a>
 ## 9. 📦 Despliegue
