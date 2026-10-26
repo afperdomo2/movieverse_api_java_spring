@@ -23,9 +23,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
 
-	// LangChain4j
-	implementation 'dev.langchain4j:langchain4j-open-ai-spring-boot-starter:1.0.0-beta1'
-	implementation 'dev.langchain4j:langchain4j-spring-boot-starter:1.0.0-beta1'
+	// Spring AI
+	implementation platform('org.springframework.ai:spring-ai-bom:1.1.8')
+	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

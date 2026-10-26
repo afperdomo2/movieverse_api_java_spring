@@ -54,6 +54,8 @@ flowchart TB
 ```text
 src/main/java/com/afperdomo2/movieverse/
 ├── MovieverseApplication.java
+├── config/
+│   └── AiHttpConfig.java
 ├── domain/
 │   ├── RatingString.java
 │   ├── dto/
@@ -121,7 +123,8 @@ sequenceDiagram
 | `MovieMapper` | Convierte entre `MovieEntity` y DTOs |
 | `RatingMapper` | Calcula `ratingString` a partir del rating numérico |
 | `RestExceptionHandler` | Traduce excepciones de dominio a respuestas HTTP |
-| `MovieverseAiService` | Interfaz `@AiService` implementada por LangChain4j |
+| `MovieverseAiService` | Clase `@Service` que encapsula un `ChatClient` de Spring AI |
+| `AiHttpConfig` | Añade `x-opencode-session` y user agent cuando el base-url es de OpenCode Go |
 
 ## Modelo de dominio
 
@@ -178,7 +181,9 @@ MapStruct genera las implementaciones al compilar. Si se cambia un mapper y el c
 
 ## Integración con IA
 
-`MovieverseAiService` es una interfaz anotada con `@AiService`; LangChain4j genera la implementación en tiempo de ejecución. `MovieService.findAll` está anotado con `@Tool` para que el modelo pueda consultar las películas disponibles.
+`MovieverseAiService` es una clase `@Service` que construye un `ChatClient` a partir del `ChatClient.Builder` que autoconfigura Spring AI. `MovieService.findAll` está anotado con `@Tool` y se registra en la petición de sugerencias con `.tools(movieService)`, de modo que el modelo puede consultar las películas disponibles.
+
+El base-url y el modelo se resuelven con `OPENAI_BASE_URL` y `OPENAI_MODEL` (por defecto OpenAI y `gpt-4o-mini`). Si el base-url apunta a `opencode.ai`, `AiHttpConfig` añade las cabeceras `x-opencode-session` y `User-Agent` que exige OpenCode Go.
 
 ```mermaid
 sequenceDiagram
@@ -201,7 +206,7 @@ sequenceDiagram
   W-->>C: 200 OK
 ```
 
-La clave por defecto es `demo`. Los endpoints de IA requieren una clave real en `LANGCHAIN4J_OPEN_AI_CHAT_MODEL_API_KEY`; el CRUD no depende de la IA.
+La clave por defecto es `demo`. Los endpoints de IA requieren una clave real en `OPENAI_API_KEY`; el CRUD no depende de la IA.
 
 ## Configuración y perfiles
 

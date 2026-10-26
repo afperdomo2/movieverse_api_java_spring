@@ -5,7 +5,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-API REST para la gestión de películas, construida con **Spring Boot 3.5.4** y **Java 21**. Incluye CRUD, validaciones, PostgreSQL, documentación Swagger y sugerencias personalizadas con **LangChain4j/OpenAI**.
+API REST para la gestión de películas, construida con **Spring Boot 3.5.4** y **Java 21**. Incluye CRUD, validaciones, PostgreSQL, documentación Swagger y sugerencias personalizadas con **Spring AI/OpenAI**.
 
 > 🏛️ Arquitectura, capas y decisiones técnicas: [ARCHITECTURE.md](ARCHITECTURE.md)
 
@@ -46,7 +46,7 @@ Movieverse API expone un catálogo de películas y permite crear, consultar, act
 - Persistencia en PostgreSQL con Spring Data JPA.
 - Mapeo entre entidades y DTOs con MapStruct.
 - Documentación interactiva con Swagger/OpenAPI.
-- Sugerencias de películas con LangChain4j y OpenAI.
+- Sugerencias de películas con Spring AI y OpenAI.
 - Datos de ejemplo cargados automáticamente en desarrollo.
 - Docker Compose para la base de datos local.
 
@@ -61,7 +61,7 @@ Movieverse API expone un catálogo de películas y permite crear, consultar, act
 | Spring Data JPA | Persistencia |
 | Spring Validation | Validaciones |
 | PostgreSQL 16 | Base de datos |
-| LangChain4j 1.0.0-beta1 | Integración con IA |
+| Spring AI 1.1.8 | Integración con IA |
 | OpenAI `gpt-4o-mini` | Modelo de sugerencias |
 | MapStruct 1.6.3 | Mapeo entidad/DTO |
 | SpringDoc OpenAPI 2.8.9 | Swagger UI |
@@ -253,8 +253,22 @@ Ejemplo de sugerencia:
 | `spring.datasource.url` | Conexión JDBC a PostgreSQL |
 | `spring.datasource.username` / `password` | Credenciales de la base |
 | `spring.jpa.hibernate.ddl-auto` | Actualización automática del esquema (`update` en dev/prod) |
-| `langchain4j.open-ai.chat-model.api-key` | API key de OpenAI; por defecto `demo` |
-| `LANGCHAIN4J_OPEN_AI_CHAT_MODEL_API_KEY` | Variable de entorno para una key real |
+| `spring.ai.openai.api-key` | API key de OpenAI (o compatible); por defecto `demo` |
+| `spring.ai.openai.chat.options.model` | Modelo de chat; por defecto `gpt-4o-mini` |
+| `spring.ai.openai.base-url` | Endpoint compatible con OpenAI; por defecto `https://api.openai.com` |
+| `OPENAI_API_KEY` | Variable de entorno para una key real |
+| `OPENAI_BASE_URL` | Variable opcional para cambiar de proveedor (por ejemplo OpenCode Go) |
+| `OPENAI_MODEL` | Variable opcional para elegir el modelo |
+| `OPENCODE_SESSION` | Cabecera `x-opencode-session` que exige OpenCode Go; por defecto `movieverse-api` |
+
+Para usar OpenCode Go, define las tres variables antes de arrancar:
+
+```powershell
+$env:OPENAI_API_KEY = "tu_api_key"
+$env:OPENAI_BASE_URL = "https://opencode.ai/inference/go/openai"
+$env:OPENAI_MODEL = "deepseek-v4.1-flash"
+.\gradlew.bat bootRun
+```
 
 No agregues claves ni credenciales reales a archivos versionados. Usa variables de entorno.
 
@@ -326,7 +340,7 @@ docker run -d \
   -e SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5434/movieverse \
   -e SPRING_DATASOURCE_USERNAME=postgres \
   -e SPRING_DATASOURCE_PASSWORD=123456 \
-  -e LANGCHAIN4J_OPEN_AI_CHAT_MODEL_API_KEY=tu_api_key \
+  -e OPENAI_API_KEY=tu_api_key \
   movieverse-api
 ```
 
@@ -361,7 +375,7 @@ La aplicación espera PostgreSQL en `localhost:5434`.
 Los endpoints `/hello` y `/movies/suggestion` necesitan una API key real. Configúrala antes de arrancar:
 
 ```powershell
-$env:LANGCHAIN4J_OPEN_AI_CHAT_MODEL_API_KEY = "tu_api_key"
+$env:OPENAI_API_KEY = "tu_api_key"
 .\gradlew.bat bootRun
 ```
 

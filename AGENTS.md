@@ -1,6 +1,6 @@
 # AGENTS.md
 
-API REST de películas con **Spring Boot 3.5.4** y **Java 21**, CRUD y sugerencias mediante **LangChain4j/OpenAI**.
+API REST de películas con **Spring Boot 3.5.4** y **Java 21**, CRUD y sugerencias mediante **Spring AI/OpenAI**.
 
 ## Documentación
 
@@ -49,13 +49,15 @@ Detalle completo en [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Integración con IA
 
-- `MovieverseAiService` es una interfaz `@AiService` generada por LangChain4j; `MovieService.findAll` se expone con `@Tool`.
-- `GET /hello` y `POST /movies/suggestion` usan OpenAI `gpt-4o-mini`.
-- La clave por defecto es `demo`; sin una clave real esos endpoints fallan. Usa `LANGCHAIN4J_OPEN_AI_CHAT_MODEL_API_KEY`.
+- `MovieverseAiService` es una clase `@Service` que encapsula un `ChatClient`; `MovieService.findAll` se expone con `@Tool` y se registra por petición con `.tools(movieService)`.
+- `GET /hello` y `POST /movies/suggestion` usan OpenAI `gpt-4o-mini` (configurable con `spring.ai.openai.chat.options.model`).
+- La clave por defecto es `demo`; sin una clave real esos endpoints fallan. Usa `OPENAI_API_KEY`.
+- `OPENAI_BASE_URL` y `OPENAI_MODEL` permiten cambiar de proveedor sin tocar archivos. `config/AiHttpConfig` añade `x-opencode-session` cuando el base-url es de OpenCode Go.
+- Si usas un endpoint compatible con OpenAI (por ejemplo OpenCode Go), configura `spring.ai.openai.base-url`; recuerda que Spring AI añade `/v1/chat/completions`.
 - No acoples el CRUD a la disponibilidad de la IA.
 
 ## Precauciones
 
 - No ejecutes el perfil `prod` en local sin revisar la configuración de base de datos externa.
-- No agregues secretos a archivos versionados; usa `SPRING_DATASOURCE_*` y `LANGCHAIN4J_OPEN_AI_CHAT_MODEL_API_KEY`.
+- No agregues secretos a archivos versionados; usa `SPRING_DATASOURCE_*` y `OPENAI_API_KEY`.
 - El contenedor Docker usa el perfil `prod` y escucha en `8080`; el desarrollo local usa `8082`.
