@@ -11,11 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mock.http.MockHttpInputMessage;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import com.afperdomo2.movieverse.domain.Genre;
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.exception.MovieAlreadyExistsException;
 import com.afperdomo2.movieverse.domain.exception.MovieNotFoundException;
@@ -55,6 +58,18 @@ class RestExceptionHandlerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody()).isEqualTo(new Error("OptimisticLockingFailure",
                 "La película fue modificada por otra operación. Vuelve a intentarlo."));
+    }
+
+    @Test
+    @DisplayName("Un body ilegible se traduce a 400")
+    void handleUnreadableMessage_returnsBadRequest() {
+        HttpMessageNotReadableException exception = new HttpMessageNotReadableException(
+                "Género inválido: Acción", new MockHttpInputMessage(new byte[0]));
+
+        ResponseEntity<Error> response = handler.handleUnreadableMessage(exception);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isEqualTo(new Error("InvalidRequest", "Género inválido: Acción"));
     }
 
     @Test
@@ -99,7 +114,7 @@ class RestExceptionHandlerTest {
     }
 
     private static BindingResult bindingResultWith(String[] fields, String[] messages) {
-        CreateMovieDto target = new CreateMovieDto("Interstellar", 169, "Sci-Fi",
+        CreateMovieDto target = new CreateMovieDto("Interstellar", 169, Genre.SCI_FI,
                 LocalDate.of(2014, 11, 7), 8.6);
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(target, "createMovieDto");
         for (int i = 0; i < fields.length; i++) {

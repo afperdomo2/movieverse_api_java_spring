@@ -3,7 +3,9 @@ package com.afperdomo2.movieverse.domain.dto;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import com.afperdomo2.movieverse.domain.Genre;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.AssertTrue;
@@ -20,12 +22,25 @@ public record PatchMovieDto(
         Optional<@PastOrPresent(message = "La fecha de lanzamiento no puede ser mayor a la fecha actual") LocalDate> releaseDate,
 
         @Schema(description = "Nueva calificación entre 0 y 9. Si se omite o se envía null, no se modifica.", minimum = "0", maximum = "9", example = "8.6")
-        Optional<@Min(value = 0, message = "La calificación debe ser mayor o igual a 0") @Max(value = 9, message = "La calificación debe ser menor o igual a 9") Double> rating) {
+        Optional<@Min(value = 0, message = "La calificación debe ser mayor o igual a 0") @Max(value = 9, message = "La calificación debe ser menor o igual a 9") Double> rating,
+
+        @Schema(description = "Nuevo género. Si se omite o se envía null, no se modifica.", example = "Comedy")
+        Optional<Genre> genre,
+
+        @Schema(description = "Activa o desactiva la película. Si se omite o se envía null, no se modifica.", example = "false")
+        @JsonProperty("isActive")
+        Optional<Boolean> active) {
 
     public PatchMovieDto {
         title = title == null ? Optional.empty() : title;
         releaseDate = releaseDate == null ? Optional.empty() : releaseDate;
         rating = rating == null ? Optional.empty() : rating;
+        genre = genre == null ? Optional.empty() : genre;
+        active = active == null ? Optional.empty() : active;
+    }
+
+    public PatchMovieDto(Optional<String> title, Optional<LocalDate> releaseDate, Optional<Double> rating) {
+        this(title, releaseDate, rating, Optional.empty(), Optional.empty());
     }
 
     @JsonIgnore
@@ -37,6 +52,10 @@ public record PatchMovieDto(
     @JsonIgnore
     @AssertTrue(message = "Debes enviar al menos un campo para actualizar")
     public boolean isAnyFieldPresent() {
-        return title.isPresent() || releaseDate.isPresent() || rating.isPresent();
+        return title.isPresent()
+                || releaseDate.isPresent()
+                || rating.isPresent()
+                || genre.isPresent()
+                || active.isPresent();
     }
 }

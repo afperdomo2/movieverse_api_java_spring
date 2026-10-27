@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.afperdomo2.movieverse.domain.Genre;
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
 import com.afperdomo2.movieverse.domain.dto.PageQuery;
@@ -100,7 +101,7 @@ class MovieControllerTest {
     @Test
     @DisplayName("create devuelve 201 con la película creada")
     void create_returnsCreated() {
-        CreateMovieDto request = new CreateMovieDto("Interstellar", 169, "Sci-Fi", RELEASE_DATE, 8.6);
+        CreateMovieDto request = new CreateMovieDto("Interstellar", 169, Genre.SCI_FI, RELEASE_DATE, 8.6);
         MovieDto created = movieDto(1L, "Interstellar");
         when(movieService.create(request)).thenReturn(created);
 
@@ -189,6 +190,6 @@ class MovieControllerTest {
     }
 
     private static MovieDto movieDto(Long id, String title) {
-        return new MovieDto(id, title, 169, "Sci-Fi", RELEASE_DATE, "D", 8.6, "VERY_GOOD");
+        return new MovieDto(id, title, 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD");
     }
 }

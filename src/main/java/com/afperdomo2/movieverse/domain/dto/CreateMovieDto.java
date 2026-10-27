@@ -2,6 +2,8 @@ package com.afperdomo2.movieverse.domain.dto;
 
 import java.time.LocalDate;
 
+import com.afperdomo2.movieverse.domain.Genre;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -23,10 +25,9 @@ public record CreateMovieDto(
         @Max(value = 600, message = "La duración no puede ser mayor a 600 minutos")
         Integer duration,
 
-        @Schema(description = "Género de la película", example = "Animation", maxLength = 50)
-        @NotBlank(message = "El género es obligatorio")
-        @Size(max = 50, message = "El género no puede superar los 50 caracteres")
-        String genre,
+        @Schema(description = "Género de la película", example = "Animation")
+        @NotNull(message = "El género es obligatorio")
+        Genre genre,
 
         @Schema(description = "Fecha de lanzamiento", example = "2004-05-19")
         @NotNull(message = "La fecha de lanzamiento es obligatoria")

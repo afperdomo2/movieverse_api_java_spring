@@ -35,13 +35,17 @@ public interface MovieMapper {
     @Mapping(target = "title", source = "title")
     @Mapping(target = "releaseDate", source = "releaseDate")
     @Mapping(target = "rating", source = "rating")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "duration", ignore = true)
+    @Mapping(target = "genre", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "version", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateEntityFromDto(UpdateMovieDto updateMovieDto, @MappingTarget MovieEntity entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(target = "version", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

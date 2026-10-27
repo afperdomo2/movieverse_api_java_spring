@@ -2,13 +2,16 @@ package com.afperdomo2.movieverse.domain.dto;
 
 import java.time.LocalDate;
 
+import com.afperdomo2.movieverse.domain.Genre;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record MovieDto(
-                Long id,
-                String title,
-                Integer duration,
-                String genre,
-                LocalDate releaseDate,
-                String status,
-                Double rating,
-                String ratingString) {
+        Long id,
+        String title,
+        Integer duration,
+        Genre genre,
+        LocalDate releaseDate,
+        @JsonProperty("isActive") boolean active,
+        Double rating,
+        String ratingString) {
 }

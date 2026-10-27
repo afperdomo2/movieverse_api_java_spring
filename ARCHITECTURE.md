@@ -175,10 +175,10 @@ La entidad `MovieEntity` se mapea a la tabla `movies`:
 | `id` | `BIGINT` | Autoincremental |
 | `title` | `VARCHAR` | Único y obligatorio |
 | `duration` | `INTEGER` | Minutos |
-| `genre` | `VARCHAR(50)` | Obligatorio |
+| `genre` | `VARCHAR(50)` | Obligatorio; enum `Genre` con 20 valores |
 | `release_date` | `DATE` | Obligatorio |
 | `rating` | `DECIMAL(3,2)` | Puede ser nulo |
-| `status` | `VARCHAR(1)` | `A` en datos iniciales; `D` al crear desde la API |
+| `is_active` | `BOOLEAN` | `true` por defecto; editable por PATCH |
 | `version` | `BIGINT` | Bloqueo optimista (`@Version`), por defecto `0` |
 | `created_at` | `TIMESTAMP WITH TIME ZONE` | Auditoría, no se modifica tras crear |
 | `updated_at` | `TIMESTAMP WITH TIME ZONE` | Auditoría, se actualiza en cada cambio |
@@ -188,10 +188,11 @@ Reglas relevantes:
 - La auditoría usa Spring Data JPA (`@CreatedDate`/`@LastModifiedDate` + `@EnableJpaAuditing`). Las columnas son `NOT NULL DEFAULT now()` para que `ddl-auto=update` pueda añadirlas sobre tablas con datos.
 - `version` implementa bloqueo optimista: Hibernate lo incrementa en cada actualización y lanza `OptimisticLockException` si hay conflicto.
 - La entidad usa Lombok (`@Getter`, `@Setter`, `@NoArgsConstructor`); no se usa `@Data` para evitar `equals`/`hashCode`/`toString` inadecuados en JPA.
-- `create` fuerza `status = "D"` y la base de datos genera el ID.
-- `CreateMovieDto` no acepta `id` ni `status`; valida título ≤ 255, género ≤ 50 y duración ≤ 600 minutos.
-- `update` (PUT) actualiza título, fecha y rating; `releaseDate` es obligatoria y `rating` sigue siendo opcional.
-- `patch` (PATCH) usa `PatchMovieDto` con `Optional` y solo modifica los campos presentes. Un body vacío devuelve 400; un título duplicado devuelve 409; la operación es `@Transactional`.
+- `create` deja `is_active = true` y la base de datos genera el ID.
+- `CreateMovieDto` no acepta `id` ni `isActive`; el género es el enum `Genre`. Valida título ≤ 255 y duración ≤ 600 minutos.
+- `update` (PUT) actualiza título, fecha y rating; `releaseDate` es obligatoria y `rating` sigue siendo opcional. No cambia `genre` ni `isActive`.
+- `patch` (PATCH) puede actualizar título, fecha, rating, `genre` e `isActive`. Un body vacío devuelve 400; un título duplicado devuelve 409; la operación es `@Transactional`.
+- Un género inválido o un body ilegible devuelve 400.
 - Un título duplicado lanza `MovieAlreadyExistsException` → HTTP 409.
 - Un ID inexistente lanza `MovieNotFoundException` → HTTP 404.
 - `data.sql` inserta películas de ejemplo solo si la tabla está vacía.
@@ -257,4 +258,4 @@ Para añadir un campo o una operación:
 - El perfil `prod` tiene configuración sensible embebida; debería migrarse a variables de entorno.
 - Los endpoints de IA no funcionan con la clave de demo.
 - `docker-compose.yaml` solo levanta PostgreSQL, no la aplicación.
-- MapStruct advierte que `updateEntityFromDto` no mapea `id`, `duration`, `genre` y `status`; es intencional, pero se puede silenciar con `ignore = true`.
+- MapStruct ignora `id`, `duration`, `genre`, `active`, `version` y auditoría en `updateEntityFromDto`; es intencional.

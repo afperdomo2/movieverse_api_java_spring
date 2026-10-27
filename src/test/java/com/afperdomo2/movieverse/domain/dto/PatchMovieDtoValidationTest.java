@@ -19,6 +19,8 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
+import com.afperdomo2.movieverse.domain.Genre;
+
 class PatchMovieDtoValidationTest {
 
     private static ValidatorFactory validatorFactory;
@@ -119,12 +121,33 @@ class PatchMovieDtoValidationTest {
     }
 
     @Test
+    @DisplayName("Un PATCH solo con género es válido")
+    void genreOnly_isValid() {
+        PatchMovieDto dto = new PatchMovieDto(Optional.empty(), Optional.empty(), Optional.empty(),
+                Optional.of(Genre.COMEDY), Optional.empty());
+
+        assertThat(validator.validate(dto)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Un PATCH solo con isActive en false es válido")
+    void activeOnly_isValid() {
+        PatchMovieDto dto = new PatchMovieDto(Optional.empty(), Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.of(false));
+
+        assertThat(dto.active()).contains(false);
+        assertThat(validator.validate(dto)).isEmpty();
+    }
+
+    @Test
     @DisplayName("Un PATCH con todos los campos válidos es válido")
     void allFields_isValid() {
         PatchMovieDto dto = new PatchMovieDto(
                 Optional.of("Interstellar"),
                 Optional.of(LocalDate.of(2014, 11, 7)),
-                Optional.of(8.6));
+                Optional.of(8.6),
+                Optional.of(Genre.SCI_FI),
+                Optional.of(true));
 
         assertThat(validator.validate(dto)).isEmpty();
     }

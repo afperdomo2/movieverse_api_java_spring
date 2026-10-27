@@ -9,7 +9,11 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import com.afperdomo2.movieverse.domain.Genre;
+import com.afperdomo2.movieverse.persistence.converter.GenreConverter;
+
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -39,8 +43,9 @@ public class MovieEntity {
     @Column(nullable = false)
     private Integer duration;
 
+    @Convert(converter = GenreConverter.class)
     @Column(nullable = false, length = 50)
-    private String genre;
+    private Genre genre;
 
     @Column(name = "release_date", nullable = false)
     private LocalDate releaseDate;
@@ -48,8 +53,9 @@ public class MovieEntity {
     @Column(precision = 3, scale = 2)
     private BigDecimal rating;
 
-    @Column(nullable = false, length = 1)
-    private String status;
+    @Column(name = "is_active", nullable = false)
+    @ColumnDefault("true")
+    private boolean active = true;
 
     @Version
     @Column(nullable = false)

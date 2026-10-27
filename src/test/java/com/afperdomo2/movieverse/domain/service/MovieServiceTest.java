@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.afperdomo2.movieverse.domain.Genre;
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
 import com.afperdomo2.movieverse.domain.dto.PageResponse;
@@ -151,10 +152,10 @@ class MovieServiceTest {
     }
 
     private static MovieDto movieDto(Long id, String title) {
-        return new MovieDto(id, title, 169, "Sci-Fi", LocalDate.of(2014, 11, 7), "D", 8.6, "VERY_GOOD");
+        return new MovieDto(id, title, 169, Genre.SCI_FI, LocalDate.of(2014, 11, 7), true, 8.6, "VERY_GOOD");
     }
 
     private static CreateMovieDto createRequest(String title) {
-        return new CreateMovieDto(title, 169, "Sci-Fi", LocalDate.of(2014, 11, 7), 8.6);
+        return new CreateMovieDto(title, 169, Genre.SCI_FI, LocalDate.of(2014, 11, 7), 8.6);
     }
 }

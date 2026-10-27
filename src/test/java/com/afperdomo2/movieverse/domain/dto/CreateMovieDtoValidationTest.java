@@ -19,6 +19,8 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
+import com.afperdomo2.movieverse.domain.Genre;
+
 class CreateMovieDtoValidationTest {
 
     private static ValidatorFactory validatorFactory;
@@ -112,31 +114,6 @@ class CreateMovieDtoValidationTest {
     }
 
     @Test
-    @DisplayName("El género en blanco es inválido")
-    void blankGenre_isRejected() {
-        CreateMovieDto dto = copyWithGenre(validDto(), "   ");
-
-        assertThat(messages(validator.validate(dto))).containsExactly("El género es obligatorio");
-    }
-
-    @Test
-    @DisplayName("El género no puede superar los 50 caracteres")
-    void longGenre_isRejected() {
-        CreateMovieDto dto = copyWithGenre(validDto(), "a".repeat(51));
-
-        assertThat(messages(validator.validate(dto)))
-                .containsExactly("El género no puede superar los 50 caracteres");
-    }
-
-    @Test
-    @DisplayName("Un género de 50 caracteres es válido")
-    void genreAtMaximumLength_isAccepted() {
-        CreateMovieDto dto = copyWithGenre(validDto(), "a".repeat(50));
-
-        assertThat(validator.validate(dto)).isEmpty();
-    }
-
-    @Test
     @DisplayName("La fecha de lanzamiento nula es inválida")
     void nullReleaseDate_isRejected() {
         CreateMovieDto dto = copyWithReleaseDate(validDto(), null);
@@ -180,7 +157,7 @@ class CreateMovieDtoValidationTest {
     }
 
     private static CreateMovieDto validDto() {
-        return new CreateMovieDto("Interstellar", 169, "Sci-Fi", LocalDate.of(2014, 11, 7), 8.6);
+        return new CreateMovieDto("Interstellar", 169, Genre.DRAMA, LocalDate.of(2014, 11, 7), 8.6);
     }
 
     private static CreateMovieDto copyWithTitle(CreateMovieDto dto, String title) {
@@ -189,10 +166,6 @@ class CreateMovieDtoValidationTest {
 
     private static CreateMovieDto copyWithDuration(CreateMovieDto dto, Integer duration) {
         return new CreateMovieDto(dto.title(), duration, dto.genre(), dto.releaseDate(), dto.rating());
-    }
-
-    private static CreateMovieDto copyWithGenre(CreateMovieDto dto, String genre) {
-        return new CreateMovieDto(dto.title(), dto.duration(), genre, dto.releaseDate(), dto.rating());
     }
 
     private static CreateMovieDto copyWithReleaseDate(CreateMovieDto dto, LocalDate releaseDate) {

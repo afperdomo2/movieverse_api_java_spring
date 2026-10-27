@@ -69,7 +69,6 @@ public class MovieEntityRepository implements MovieRepository {
         }
         MovieEntity newMovie = new MovieEntity();
         this.movieMapper.createEntityFromDto(movieDto, newMovie);
-        newMovie.setStatus("D");
         this.crudMovieEntity.save(newMovie);
         return this.movieMapper.toDto(newMovie);
     }
@@ -96,13 +95,19 @@ public class MovieEntityRepository implements MovieRepository {
             throw new MovieNotFoundException(id);
         }
 
-        if (changes.title().isEmpty() && changes.releaseDate().isEmpty() && changes.rating().isEmpty()) {
+        if (changes.title().isEmpty()
+                && changes.releaseDate().isEmpty()
+                && changes.rating().isEmpty()
+                && changes.genre().isEmpty()
+                && changes.active().isEmpty()) {
             return this.movieMapper.toDto(movie);
         }
 
         changes.title().ifPresent(title -> updateTitle(id, movie, title));
         changes.releaseDate().ifPresent(movie::setReleaseDate);
         changes.rating().ifPresent(rating -> movie.setRating(BigDecimal.valueOf(rating)));
+        changes.genre().ifPresent(movie::setGenre);
+        changes.active().ifPresent(movie::setActive);
 
         this.crudMovieEntity.save(movie);
         return this.movieMapper.toDto(movie);

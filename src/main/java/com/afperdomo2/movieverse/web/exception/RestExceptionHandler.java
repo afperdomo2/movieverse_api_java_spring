@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -33,6 +34,15 @@ public class RestExceptionHandler {
         Error error = new Error("OptimisticLockingFailure",
                 "La película fue modificada por otra operación. Vuelve a intentarlo.");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Error> handleUnreadableMessage(HttpMessageNotReadableException ex) {
+        String message = ex.getMostSpecificCause() != null
+                ? ex.getMostSpecificCause().getMessage()
+                : "El cuerpo de la solicitud contiene un valor inválido.";
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new Error("InvalidRequest", message));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

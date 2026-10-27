@@ -27,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import com.afperdomo2.movieverse.domain.Genre;
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
 import com.afperdomo2.movieverse.domain.dto.PageResponse;
@@ -163,8 +164,8 @@ class MovieEntityRepositoryTest {
     }
 
     @Test
-    @DisplayName("create guarda la entidad con estado D y devuelve el DTO")
-    void create_savesEntityWithStatusD() {
+    @DisplayName("create guarda la entidad activa y devuelve el DTO")
+    void create_savesActiveEntity() {
         CreateMovieDto request = createRequest("Interstellar");
         MovieDto created = movieDto(1L, "Interstellar");
         doAnswer(invocation -> {
@@ -184,7 +185,7 @@ class MovieEntityRepositoryTest {
         verify(crudMovieEntity).findByTitle("Interstellar");
         verify(crudMovieEntity).save(entityCaptor.capture());
         MovieEntity saved = entityCaptor.getValue();
-        assertThat(saved.getStatus()).isEqualTo("D");
+        assertThat(saved.isActive()).isTrue();
         assertThat(saved.getTitle()).isEqualTo("Interstellar");
         assertThat(saved.getRating()).isEqualByComparingTo("8.6");
         verify(movieMapper).createEntityFromDto(request, saved);
@@ -215,7 +216,7 @@ class MovieEntityRepositoryTest {
         assertThat(repository.update(1L, changes)).isEqualTo(updated);
         verify(movieMapper).updateEntityFromDto(changes, entity);
         verify(crudMovieEntity).save(entity);
-        assertThat(entity.getStatus()).isEqualTo("D");
+        assertThat(entity.isActive()).isTrue();
     }
 
     @Test
@@ -301,6 +302,42 @@ class MovieEntityRepositoryTest {
     }
 
     @Test
+    @DisplayName("patch actualiza solo el género y conserva el resto")
+    void patch_updatesOnlyGenre() {
+        MovieEntity entity = movieEntity(1L, "Interstellar");
+        PatchMovieDto changes = new PatchMovieDto(Optional.empty(), Optional.empty(), Optional.empty(),
+                Optional.of(Genre.COMEDY), Optional.empty());
+        MovieDto dto = movieDto(1L, "Interstellar");
+        when(crudMovieEntity.findById(1L)).thenReturn(Optional.of(entity));
+        when(movieMapper.toDto(entity)).thenReturn(dto);
+
+        repository.patch(1L, changes);
+
+        assertThat(entity.getGenre()).isEqualTo(Genre.COMEDY);
+        assertThat(entity.getTitle()).isEqualTo("Interstellar");
+        assertThat(entity.isActive()).isTrue();
+        verify(crudMovieEntity).save(entity);
+    }
+
+    @Test
+    @DisplayName("patch desactiva la película y conserva el resto")
+    void patch_updatesOnlyActive() {
+        MovieEntity entity = movieEntity(1L, "Interstellar");
+        PatchMovieDto changes = new PatchMovieDto(Optional.empty(), Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.of(false));
+        MovieDto dto = movieDto(1L, "Interstellar");
+        when(crudMovieEntity.findById(1L)).thenReturn(Optional.of(entity));
+        when(movieMapper.toDto(entity)).thenReturn(dto);
+
+        repository.patch(1L, changes);
+
+        assertThat(entity.isActive()).isFalse();
+        assertThat(entity.getGenre()).isEqualTo(Genre.SCI_FI);
+        assertThat(entity.getTitle()).isEqualTo("Interstellar");
+        verify(crudMovieEntity).save(entity);
+    }
+
+    @Test
     @DisplayName("patch sin campos no guarda cambios")
     void patch_withEmptyChanges_doesNotSave() {
         MovieEntity entity = movieEntity(1L, "Interstellar");
@@ -382,18 +419,18 @@ class MovieEntityRepositoryTest {
         entity.setId(id);
         entity.setTitle(title);
         entity.setDuration(169);
-        entity.setGenre("Sci-Fi");
+        entity.setGenre(Genre.SCI_FI);
         entity.setReleaseDate(RELEASE_DATE);
         entity.setRating(new BigDecimal("8.6"));
-        entity.setStatus("D");
+        entity.setActive(true);
         return entity;
     }
 
     private static MovieDto movieDto(Long id, String title) {
-        return new MovieDto(id, title, 169, "Sci-Fi", RELEASE_DATE, "D", 8.6, "VERY_GOOD");
+        return new MovieDto(id, title, 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD");
     }
 
     private static CreateMovieDto createRequest(String title) {
-        return new CreateMovieDto(title, 169, "Sci-Fi", RELEASE_DATE, 8.6);
+        return new CreateMovieDto(title, 169, Genre.SCI_FI, RELEASE_DATE, 8.6);
     }
 }
