@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.PageResponse;
 import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.exception.MovieNotFoundException;
@@ -52,6 +53,17 @@ class MovieServiceTest {
 
         assertThat(movieService.findAll()).isEmpty();
         verify(movieRepository).findAll();
+    }
+
+    @Test
+    @DisplayName("findPage delega en el repositorio")
+    void findPage_delegatesToRepository() {
+        PageResponse<MovieDto> page = new PageResponse<>(
+                List.of(movieDto(1L, "Interstellar")), 1, 10, 19, 2, true, false);
+        when(movieRepository.findPage(1, 10)).thenReturn(page);
+
+        assertThat(movieService.findPage(1, 10)).isEqualTo(page);
+        verify(movieRepository).findPage(1, 10);
     }
 
     @Test

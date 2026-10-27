@@ -3,11 +3,16 @@ package com.afperdomo2.movieverse.persistence.repository;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.PageResponse;
 import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.exception.MovieAlreadyExistsException;
@@ -30,6 +35,22 @@ public class MovieEntityRepository implements MovieRepository {
     @Override
     public List<MovieDto> findAll() {
         return this.movieMapper.toDto(this.crudMovieEntity.findAll());
+    }
+
+    @Override
+    public PageResponse<MovieDto> findPage(int page, int limit) {
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").ascending());
+        Page<MovieEntity> result = this.crudMovieEntity.findAll(pageable);
+        List<MovieDto> items = this.movieMapper.toDto(result.getContent());
+
+        return new PageResponse<>(
+                items,
+                page,
+                limit,
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.hasNext(),
+                result.hasPrevious());
     }
 
     @Override

@@ -222,7 +222,7 @@ Las rutas son relativas al contexto `/movieverse/api`:
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| `GET` | `/movies` | Listar películas |
+| `GET` | `/movies?page=1&limit=10` | Listar películas (paginado) |
 | `GET` | `/movies/{id}` | Obtener una película |
 | `POST` | `/movies` | Crear una película |
 | `PUT` | `/movies/{id}` | Actualizar una película |
@@ -238,6 +238,33 @@ Ejemplo de sugerencia:
   "userPreferences": "Me gustan la ciencia ficción y la acción con efectos especiales"
 }
 ```
+
+**Paginación de películas**
+
+`GET /movies` acepta estos parámetros:
+
+| Parámetro | Por defecto | Límites |
+|---|---:|---|
+| `page` | `1` | Mayor o igual a 1 |
+| `limit` | `10` | Entre 1 y 100 |
+
+```http
+GET /movieverse/api/movies?page=1&limit=10
+```
+
+```json
+{
+  "items": [ ... ],
+  "page": 1,
+  "limit": 10,
+  "totalElements": 19,
+  "totalPages": 2,
+  "hasNext": true,
+  "hasPrevious": false
+}
+```
+
+> `GET /movies` ahora devuelve un objeto paginado, no un array. La herramienta de IA sigue usando `MovieService.findAll()` sin paginar.
 
 Ejemplo de actualización parcial:
 

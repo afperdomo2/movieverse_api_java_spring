@@ -1,11 +1,11 @@
 package com.afperdomo2.movieverse.web.controller;
 
-import java.util.List;
-
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.PageQuery;
+import com.afperdomo2.movieverse.domain.dto.PageResponse;
 import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
 import com.afperdomo2.movieverse.domain.dto.SuggestionRequestDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
@@ -42,11 +44,13 @@ public class MovieController {
     }
 
     @GetMapping()
-    @Operation(summary = "Obtener todas las películas", description = "Devuelve una lista de todas las películas")
-    @ApiResponse(responseCode = "200", description = "Lista de películas encontrada")
-    public ResponseEntity<List<MovieDto>> findAll() {
-        List<MovieDto> movies = this.movieService.findAll();
-        return ResponseEntity.ok(movies);
+    @Operation(summary = "Listar películas paginadas", description = "Devuelve una página de películas. Por defecto page=1 y limit=10", responses = {
+            @ApiResponse(responseCode = "200", description = "Página de películas encontrada"),
+            @ApiResponse(responseCode = "400", description = "Parámetros de paginación inválidos", content = @Content())
+    })
+    public ResponseEntity<PageResponse<MovieDto>> findAll(
+            @ParameterObject @Valid @ModelAttribute PageQuery query) {
+        return ResponseEntity.ok(this.movieService.findPage(query.getPage(), query.getLimit()));
     }
 
     @GetMapping("/{id}")

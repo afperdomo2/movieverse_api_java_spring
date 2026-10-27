@@ -22,9 +22,14 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.PageResponse;
 import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.exception.MovieAlreadyExistsException;
@@ -70,6 +75,67 @@ class MovieEntityRepositoryTest {
         when(movieMapper.toDto(List.<MovieEntity>of())).thenReturn(List.of());
 
         assertThat(repository.findAll()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("findPage mapea la página, los metadatos y ordena por id")
+    void findPage_mapsPageAndMetadata() {
+        List<MovieEntity> entities = List.of(movieEntity(1L, "Interstellar"));
+        List<MovieDto> dtos = List.of(movieDto(1L, "Interstellar"));
+        PageImpl<MovieEntity> page = new PageImpl<>(entities, PageRequest.of(0, 10, Sort.by("id").ascending()), 19);
+        when(crudMovieEntity.findAll(any(Pageable.class))).thenReturn(page);
+        when(movieMapper.toDto(entities)).thenReturn(dtos);
+
+        PageResponse<MovieDto> response = repository.findPage(1, 10);
+
+        assertThat(response.items()).isEqualTo(dtos);
+        assertThat(response.page()).isEqualTo(1);
+        assertThat(response.limit()).isEqualTo(10);
+        assertThat(response.totalElements()).isEqualTo(19);
+        assertThat(response.totalPages()).isEqualTo(2);
+        assertThat(response.hasNext()).isTrue();
+        assertThat(response.hasPrevious()).isFalse();
+
+        ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+        verify(crudMovieEntity).findAll(pageableCaptor.capture());
+        Pageable pageable = pageableCaptor.getValue();
+        assertThat(pageable.getPageNumber()).isZero();
+        assertThat(pageable.getPageSize()).isEqualTo(10);
+        assertThat(pageable.getSort().getOrderFor("id")).isNotNull();
+        assertThat(pageable.getSort().getOrderFor("id").getDirection()).isEqualTo(Sort.Direction.ASC);
+    }
+
+    @Test
+    @DisplayName("findPage mapea una página posterior")
+    void findPage_mapsSecondPage() {
+        List<MovieEntity> entities = List.of(movieEntity(11L, "Movie 11"));
+        List<MovieDto> dtos = List.of(movieDto(11L, "Movie 11"));
+        PageImpl<MovieEntity> page = new PageImpl<>(entities, PageRequest.of(1, 10, Sort.by("id").ascending()), 19);
+        when(crudMovieEntity.findAll(any(Pageable.class))).thenReturn(page);
+        when(movieMapper.toDto(entities)).thenReturn(dtos);
+
+        PageResponse<MovieDto> response = repository.findPage(2, 10);
+
+        assertThat(response.page()).isEqualTo(2);
+        assertThat(response.hasPrevious()).isTrue();
+        assertThat(response.hasNext()).isFalse();
+    }
+
+    @Test
+    @DisplayName("findPage devuelve una página vacía cuando no hay resultados")
+    void findPage_returnsEmptyPage() {
+        List<MovieEntity> entities = List.of();
+        PageImpl<MovieEntity> page = new PageImpl<>(entities, PageRequest.of(0, 10, Sort.by("id").ascending()), 0);
+        when(crudMovieEntity.findAll(any(Pageable.class))).thenReturn(page);
+        when(movieMapper.toDto(entities)).thenReturn(List.of());
+
+        PageResponse<MovieDto> response = repository.findPage(1, 10);
+
+        assertThat(response.items()).isEmpty();
+        assertThat(response.totalElements()).isZero();
+        assertThat(response.totalPages()).isZero();
+        assertThat(response.hasNext()).isFalse();
+        assertThat(response.hasPrevious()).isFalse();
     }
 
     @Test

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.PageResponse;
 import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.repository.MovieRepository;
@@ -23,6 +24,10 @@ public class MovieService {
     @Tool(description = "Busca todas las películas que están dentro de la plataforma")
     public List<MovieDto> findAll() {
         return this.movieRepository.findAll();
+    }
+
+    public PageResponse<MovieDto> findPage(int page, int limit) {
+        return this.movieRepository.findPage(page, limit);
     }
 
     public MovieDto findById(long id) {

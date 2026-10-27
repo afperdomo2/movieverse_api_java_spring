@@ -19,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.PageQuery;
+import com.afperdomo2.movieverse.domain.dto.PageResponse;
 import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
 import com.afperdomo2.movieverse.domain.dto.SuggestionRequestDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
@@ -40,16 +42,35 @@ class MovieControllerTest {
     private MovieController movieController;
 
     @Test
-    @DisplayName("findAll devuelve 200 con la lista de películas")
-    void findAll_returnsOkWithMovies() {
-        List<MovieDto> movies = List.of(movieDto(1L, "Interstellar"));
-        when(movieService.findAll()).thenReturn(movies);
+    @DisplayName("findAll devuelve 200 con la página de películas")
+    void findAll_returnsOkWithPage() {
+        PageQuery query = new PageQuery();
+        PageResponse<MovieDto> page = new PageResponse<>(
+                List.of(movieDto(1L, "Interstellar")), 1, 10, 19, 2, true, false);
+        when(movieService.findPage(1, 10)).thenReturn(page);
 
-        ResponseEntity<List<MovieDto>> response = movieController.findAll();
+        ResponseEntity<PageResponse<MovieDto>> response = movieController.findAll(query);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo(movies);
-        verify(movieService).findAll();
+        assertThat(response.getBody()).isEqualTo(page);
+        verify(movieService).findPage(1, 10);
+    }
+
+    @Test
+    @DisplayName("findAll usa los valores de page y limit de la query")
+    void findAll_usesQueryParameters() {
+        PageQuery query = new PageQuery();
+        query.setPage(2);
+        query.setLimit(5);
+        PageResponse<MovieDto> page = new PageResponse<>(
+                List.of(movieDto(6L, "Movie 6")), 2, 5, 19, 4, true, true);
+        when(movieService.findPage(2, 5)).thenReturn(page);
+
+        ResponseEntity<PageResponse<MovieDto>> response = movieController.findAll(query);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEqualTo(page);
+        verify(movieService).findPage(2, 5);
     }
 
     @Test

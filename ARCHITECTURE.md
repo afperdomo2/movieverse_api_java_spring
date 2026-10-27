@@ -110,6 +110,14 @@ sequenceDiagram
 
 `MovieService` depende de la interfaz `MovieRepository`; Spring inyecta `MovieEntityRepository`, que es la implementación de persistencia.
 
+### Paginación del listado
+
+`GET /movies?page=1&limit=10` usa `PageQuery` (page 1-based, limit entre 1 y 100) y llama a `MovieService.findPage`, que delega en `MovieEntityRepository.findPage`. Este construye `PageRequest.of(page - 1, limit, Sort.by("id").ascending())` y devuelve un `PageResponse<MovieDto>` con `items`, `totalElements`, `totalPages`, `hasNext` y `hasPrevious`.
+
+- Una página fuera de rango devuelve `items` vacío con HTTP 200.
+- Parámetros inválidos devuelven HTTP 400.
+- `MovieService.findAll()` se mantiene sin paginar porque es la herramienta `@Tool` que usa la IA.
+
 ## Componentes principales
 
 | Componente | Responsabilidad |
@@ -119,7 +127,7 @@ sequenceDiagram
 | `MovieService` | Orquesta las operaciones de negocio y expone `findAll` como herramienta de IA |
 | `MovieRepository` | Contrato de persistencia del dominio |
 | `MovieEntityRepository` | Implementa el contrato usando `CrudMovieEntity` y MapStruct |
-| `CrudMovieEntity` | Repositorio Spring Data (`CrudRepository`) |
+| `CrudMovieEntity` | Repositorio Spring Data (`JpaRepository`) |
 | `MovieMapper` | Convierte entre `MovieEntity` y DTOs |
 | `RatingMapper` | Calcula `ratingString` a partir del rating numérico |
 | `RestExceptionHandler` | Traduce excepciones de dominio a respuestas HTTP |
@@ -134,6 +142,8 @@ sequenceDiagram
 | `CreateMovieDto` | Entrada para crear; incluye validaciones |
 | `UpdateMovieDto` | Entrada para actualizar título, fecha y rating |
 | `PatchMovieDto` | Entrada para actualizar parcialmente título, fecha y rating; usa `Optional` |
+| `PageQuery` | Parámetros de paginación `page` (1-based) y `limit` (máximo 100) |
+| `PageResponse<T>` | Respuesta paginada con `items`, página actual y metadatos |
 | `SuggestionRequestDto` | Preferencias del usuario para generar sugerencias |
 
 ### Validaciones de creación

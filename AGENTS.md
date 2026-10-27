@@ -44,6 +44,7 @@ API REST de películas con **Spring Boot 3.5.4** y **Java 21**, CRUD y sugerenci
 - `domain/` no debe importar `persistence/` ni `web/`.
 - DTOs en `domain/dto`; mappers MapStruct en `persistence/mapper`.
 - Para añadir un campo u operación CRUD: DTO, `MovieRepository`, `MovieEntityRepository`, `MovieMapper` y `MovieController`.
+- `GET /movies` es paginado (`page` 1-based por defecto 1, `limit` por defecto 10 y máximo 100) y devuelve `PageResponse<MovieDto>`; `MovieService.findAll()` sigue sin paginar para la herramienta de IA.
 - La lógica de persistencia vive en `MovieEntityRepository`: ID inexistente → 404; título duplicado → 409; `create` fuerza `status="D"`.
 - `PATCH /movies/{id}` usa `PatchMovieDto` con `Optional`: solo actualiza los campos enviados, body vacío → 400, título duplicado → 409 y la operación es `@Transactional`.
 - `RestExceptionHandler` traduce las excepciones de dominio y `ObjectOptimisticLockingFailureException` → 409; los null checks de los controladores son código muerto.
