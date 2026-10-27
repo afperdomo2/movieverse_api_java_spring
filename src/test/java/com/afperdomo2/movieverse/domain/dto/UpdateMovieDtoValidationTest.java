@@ -51,6 +51,23 @@ class UpdateMovieDtoValidationTest {
     }
 
     @Test
+    @DisplayName("El título no puede superar los 255 caracteres")
+    void longTitle_isRejected() {
+        UpdateMovieDto dto = new UpdateMovieDto("a".repeat(256), LocalDate.of(2014, 11, 7), 8.6);
+
+        assertThat(messages(validator.validate(dto)))
+                .containsExactly("El título no puede superar los 255 caracteres");
+    }
+
+    @Test
+    @DisplayName("Un título de 255 caracteres es válido")
+    void titleAtMaximumLength_isAccepted() {
+        UpdateMovieDto dto = new UpdateMovieDto("a".repeat(255), LocalDate.of(2014, 11, 7), 8.6);
+
+        assertThat(validator.validate(dto)).isEmpty();
+    }
+
+    @Test
     @DisplayName("La fecha de lanzamiento futura es inválida")
     void futureReleaseDate_isRejected() {
         UpdateMovieDto dto = new UpdateMovieDto("Interstellar", LocalDate.now().plusDays(1), 8.6);
@@ -79,9 +96,19 @@ class UpdateMovieDtoValidationTest {
     }
 
     @Test
-    @DisplayName("La fecha y la calificación admiten null (no tienen @NotNull)")
-    void nullReleaseDateAndRating_areAccepted() {
-        assertThat(validator.validate(new UpdateMovieDto("Interstellar", null, null))).isEmpty();
+    @DisplayName("La fecha de lanzamiento nula es inválida")
+    void nullReleaseDate_isRejected() {
+        UpdateMovieDto dto = new UpdateMovieDto("Interstellar", null, 8.6);
+
+        assertThat(messages(validator.validate(dto)))
+                .containsExactly("La fecha de lanzamiento es obligatoria");
+    }
+
+    @Test
+    @DisplayName("La calificación nula sigue siendo válida")
+    void nullRating_isAccepted() {
+        assertThat(validator.validate(new UpdateMovieDto("Interstellar", LocalDate.of(2014, 11, 7), null)))
+                .isEmpty();
     }
 
     private static UpdateMovieDto validDto() {

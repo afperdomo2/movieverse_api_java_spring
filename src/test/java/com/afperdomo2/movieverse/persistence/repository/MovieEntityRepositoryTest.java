@@ -191,18 +191,6 @@ class MovieEntityRepositoryTest {
     }
 
     @Test
-    @DisplayName("create ignora el estado enviado en el DTO y siempre guarda D")
-    void create_ignoresStatusFromRequest() {
-        CreateMovieDto request = new CreateMovieDto(5L, "Interstellar", 169, "Sci-Fi", RELEASE_DATE, 8.6, "A");
-        when(movieMapper.toDto(any(MovieEntity.class))).thenReturn(movieDto(1L, "Interstellar"));
-
-        repository.create(request);
-
-        verify(crudMovieEntity).save(entityCaptor.capture());
-        assertThat(entityCaptor.getValue().getStatus()).isEqualTo("D");
-    }
-
-    @Test
     @DisplayName("create lanza MovieAlreadyExistsException cuando el título ya existe")
     void create_throwsMovieAlreadyExists_whenTitleExists() {
         CreateMovieDto request = createRequest("Interstellar");
@@ -406,6 +394,6 @@ class MovieEntityRepositoryTest {
     }
 
     private static CreateMovieDto createRequest(String title) {
-        return new CreateMovieDto(null, title, 169, "Sci-Fi", RELEASE_DATE, 8.6, null);
+        return new CreateMovieDto(title, 169, "Sci-Fi", RELEASE_DATE, 8.6);
     }
 }

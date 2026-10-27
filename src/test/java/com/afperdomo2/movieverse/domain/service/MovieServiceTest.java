@@ -155,6 +155,6 @@ class MovieServiceTest {
     }
 
     private static CreateMovieDto createRequest(String title) {
-        return new CreateMovieDto(null, title, 169, "Sci-Fi", LocalDate.of(2014, 11, 7), 8.6, null);
+        return new CreateMovieDto(title, 169, "Sci-Fi", LocalDate.of(2014, 11, 7), 8.6);
     }
 }

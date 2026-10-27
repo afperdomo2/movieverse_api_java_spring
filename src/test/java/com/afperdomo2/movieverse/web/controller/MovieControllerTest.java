@@ -100,7 +100,7 @@ class MovieControllerTest {
     @Test
     @DisplayName("create devuelve 201 con la película creada")
     void create_returnsCreated() {
-        CreateMovieDto request = new CreateMovieDto(null, "Interstellar", 169, "Sci-Fi", RELEASE_DATE, 8.6, null);
+        CreateMovieDto request = new CreateMovieDto("Interstellar", 169, "Sci-Fi", RELEASE_DATE, 8.6);
         MovieDto created = movieDto(1L, "Interstellar");
         when(movieService.create(request)).thenReturn(created);
 

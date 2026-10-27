@@ -99,8 +99,8 @@ class RestExceptionHandlerTest {
     }
 
     private static BindingResult bindingResultWith(String[] fields, String[] messages) {
-        CreateMovieDto target = new CreateMovieDto(null, "Interstellar", 169, "Sci-Fi",
-                LocalDate.of(2014, 11, 7), 8.6, null);
+        CreateMovieDto target = new CreateMovieDto("Interstellar", 169, "Sci-Fi",
+                LocalDate.of(2014, 11, 7), 8.6);
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(target, "createMovieDto");
         for (int i = 0; i < fields.length; i++) {
             bindingResult.rejectValue(fields[i], "invalid", messages[i]);

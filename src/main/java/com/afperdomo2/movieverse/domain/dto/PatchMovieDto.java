@@ -10,10 +10,11 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Size;
 
 public record PatchMovieDto(
-        @Schema(description = "Nuevo título. Si se omite o se envía null, no se modifica.", example = "Interstellar")
-        Optional<String> title,
+        @Schema(description = "Nuevo título. Si se omite o se envía null, no se modifica.", example = "Interstellar", maxLength = 255)
+        Optional<@Size(max = 255, message = "El título no puede superar los 255 caracteres") String> title,
 
         @Schema(description = "Nueva fecha de lanzamiento. Si se omite o se envía null, no se modifica.", example = "2014-11-07")
         Optional<@PastOrPresent(message = "La fecha de lanzamiento no puede ser mayor a la fecha actual") LocalDate> releaseDate,

@@ -188,8 +188,9 @@ Reglas relevantes:
 - La auditoría usa Spring Data JPA (`@CreatedDate`/`@LastModifiedDate` + `@EnableJpaAuditing`). Las columnas son `NOT NULL DEFAULT now()` para que `ddl-auto=update` pueda añadirlas sobre tablas con datos.
 - `version` implementa bloqueo optimista: Hibernate lo incrementa en cada actualización y lanza `OptimisticLockException` si hay conflicto.
 - La entidad usa Lombok (`@Getter`, `@Setter`, `@NoArgsConstructor`); no se usa `@Data` para evitar `equals`/`hashCode`/`toString` inadecuados en JPA.
-- `create` fuerza `status = "D"` sin importar el valor enviado.
-- `update` (PUT) actualiza título, fecha y rating; los campos omitidos se guardan como `null`.
+- `create` fuerza `status = "D"` y la base de datos genera el ID.
+- `CreateMovieDto` no acepta `id` ni `status`; valida título ≤ 255, género ≤ 50 y duración ≤ 600 minutos.
+- `update` (PUT) actualiza título, fecha y rating; `releaseDate` es obligatoria y `rating` sigue siendo opcional.
 - `patch` (PATCH) usa `PatchMovieDto` con `Optional` y solo modifica los campos presentes. Un body vacío devuelve 400; un título duplicado devuelve 409; la operación es `@Transactional`.
 - Un título duplicado lanza `MovieAlreadyExistsException` → HTTP 409.
 - Un ID inexistente lanza `MovieNotFoundException` → HTTP 404.

@@ -73,6 +73,23 @@ class PatchMovieDtoValidationTest {
     }
 
     @Test
+    @DisplayName("El título no puede superar los 255 caracteres")
+    void longTitle_isRejected() {
+        PatchMovieDto dto = new PatchMovieDto(Optional.of("a".repeat(256)), Optional.empty(), Optional.empty());
+
+        assertThat(messages(validator.validate(dto)))
+                .containsExactly("El título no puede superar los 255 caracteres");
+    }
+
+    @Test
+    @DisplayName("Un título de 255 caracteres es válido")
+    void titleAtMaximumLength_isAccepted() {
+        PatchMovieDto dto = new PatchMovieDto(Optional.of("a".repeat(255)), Optional.empty(), Optional.empty());
+
+        assertThat(validator.validate(dto)).isEmpty();
+    }
+
+    @Test
     @DisplayName("La fecha de lanzamiento futura es inválida")
     void futureReleaseDate_isRejected() {
         PatchMovieDto dto = new PatchMovieDto(Optional.empty(), Optional.of(LocalDate.now().plusDays(1)),

@@ -95,26 +95,26 @@ class MovieMapperTest {
     }
 
     @Test
-    @DisplayName("createEntityFromDto copia todos los campos, incluido el estado enviado")
-    void createEntityFromDto_mapsAllFields() {
-        CreateMovieDto dto = new CreateMovieDto(7L, "Interstellar", 169, "Sci-Fi", RELEASE_DATE, 8.6, "A");
+    @DisplayName("createEntityFromDto mapea los campos de creación y no asigna id ni estado")
+    void createEntityFromDto_mapsCreateFields() {
+        CreateMovieDto dto = new CreateMovieDto("Interstellar", 169, "Sci-Fi", RELEASE_DATE, 8.6);
         MovieEntity entity = new MovieEntity();
 
         mapper.createEntityFromDto(dto, entity);
 
-        assertThat(entity.getId()).isEqualTo(7L);
+        assertThat(entity.getId()).isNull();
         assertThat(entity.getTitle()).isEqualTo("Interstellar");
         assertThat(entity.getDuration()).isEqualTo(169);
         assertThat(entity.getGenre()).isEqualTo("Sci-Fi");
         assertThat(entity.getReleaseDate()).isEqualTo(RELEASE_DATE);
         assertThat(entity.getRating()).isEqualByComparingTo("8.6");
-        assertThat(entity.getStatus()).isEqualTo("A");
+        assertThat(entity.getStatus()).isNull();
     }
 
     @Test
     @DisplayName("createEntityFromDto deja la calificación en null cuando el DTO la envía null")
     void createEntityFromDto_setsNullRating() {
-        CreateMovieDto dto = new CreateMovieDto(null, "Interstellar", 169, "Sci-Fi", RELEASE_DATE, null, null);
+        CreateMovieDto dto = new CreateMovieDto("Interstellar", 169, "Sci-Fi", RELEASE_DATE, null);
         MovieEntity entity = movieEntity();
 
         mapper.createEntityFromDto(dto, entity);
@@ -123,8 +123,8 @@ class MovieMapperTest {
     }
 
     @Test
-    @DisplayName("createEntityFromDto preserva la auditoría y la versión de una entidad existente")
-    void createEntityFromDto_preservesAuditAndVersionFields() {
+    @DisplayName("createEntityFromDto preserva id, estado, auditoría y versión de una entidad existente")
+    void createEntityFromDto_preservesExistingEntityFields() {
         MovieEntity entity = movieEntity();
         Instant createdAt = Instant.parse("2026-01-01T10:00:00Z");
         Instant updatedAt = Instant.parse("2026-01-02T10:00:00Z");
@@ -133,8 +133,10 @@ class MovieMapperTest {
         entity.setVersion(3L);
 
         mapper.createEntityFromDto(
-                new CreateMovieDto(null, "Interstellar", 169, "Sci-Fi", RELEASE_DATE, 8.6, null), entity);
+                new CreateMovieDto("Interstellar", 169, "Sci-Fi", RELEASE_DATE, 8.6), entity);
 
+        assertThat(entity.getId()).isEqualTo(1L);
+        assertThat(entity.getStatus()).isEqualTo("D");
         assertThat(entity.getCreatedAt()).isEqualTo(createdAt);
         assertThat(entity.getUpdatedAt()).isEqualTo(updatedAt);
         assertThat(entity.getVersion()).isEqualTo(3L);
