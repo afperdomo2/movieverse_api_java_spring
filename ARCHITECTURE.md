@@ -36,7 +36,7 @@ flowchart TB
     CRUD[CrudMovieEntity / CrudAuthorEntity]
     MAP[MovieMapper / AuthorMapper / RatingMapper]
     ENT[MovieEntity / AuthorEntity]
-    BASE[BaseEntity / AuditableEntity]
+    BASE[BaseEntity]
   end
 
   subgraph Common["Capa común"]
@@ -117,7 +117,6 @@ src/main/java/com/afperdomo2/movieverse/
 │   │   ├── CrudAuthorEntity.java
 │   │   └── CrudMovieEntity.java
 │   ├── entity/
-│   │   ├── AuditableEntity.java
 │   │   ├── AuthorEntity.java
 │   │   ├── BaseEntity.java
 │   │   └── MovieEntity.java
@@ -188,8 +187,7 @@ sequenceDiagram
 | `MovieEntityRepository` | Implementa el contrato usando `CrudMovieEntity` y MapStruct |
 | `AuthorEntityRepository` | Implementa el CRUD de autores con `CrudAuthorEntity` y MapStruct |
 | `CrudMovieEntity` / `CrudAuthorEntity` | Repositorios Spring Data (`JpaRepository`) |
-| `BaseEntity` | `@MappedSuperclass` con `id` UUID y `version` para bloqueo optimista |
-| `AuditableEntity` | `@MappedSuperclass` que hereda de `BaseEntity` y añade `createdAt`/`updatedAt` |
+| `BaseEntity` | `@MappedSuperclass` con `id` UUID, `version`, `createdAt` y `updatedAt`; base común de las entidades |
 | `MovieMapper` / `AuthorMapper` | Convierten entre entidades y DTOs |
 | `RatingMapper` | Calcula `ratingString` a partir del rating numérico |
 | `UuidV7Generator` | Genera UUID v7 para las PK de `movies` y `authors` |
@@ -261,9 +259,9 @@ La entidad `MovieEntity` se mapea a la tabla `movies`:
 
 Reglas relevantes:
 
-- La auditoría usa Spring Data JPA (`@CreatedDate`/`@LastModifiedDate` + `@EnableJpaAuditing`) y se define una sola vez en `AuditableEntity`. Las columnas son `NOT NULL DEFAULT now()` para que `ddl-auto=update` pueda añadirlas sobre tablas con datos.
+- La auditoría usa Spring Data JPA (`@CreatedDate`/`@LastModifiedDate` + `@EnableJpaAuditing`) y se define una sola vez en `BaseEntity`. Las columnas son `NOT NULL DEFAULT now()` para que `ddl-auto=update` pueda añadirlas sobre tablas con datos.
 - `version` implementa bloqueo optimista, vive en `BaseEntity` y Hibernate lo incrementa en cada actualización; lanza `OptimisticLockException` si hay conflicto.
-- `MovieEntity` y `AuthorEntity` extienden `AuditableEntity`, que extiende `BaseEntity`. No redeclaran `id`, `version`, `createdAt` ni `updatedAt`.
+- `MovieEntity` y `AuthorEntity` extienden `BaseEntity`. No redeclaran `id`, `version`, `createdAt` ni `updatedAt`.
 - La entidad usa Lombok (`@Getter`, `@Setter`, `@NoArgsConstructor`); no se usa `@Data` para evitar `equals`/`hashCode`/`toString` inadecuados en JPA.
 - `create` deja `is_active = true` y genera el ID con `UuidV7Generator.generate()`.
 - `CreateMovieDto` no acepta `id` ni `isActive`; el género es el enum `Genre`. Valida título ≤ 255 y duración ≤ 600 minutos.

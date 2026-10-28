@@ -54,7 +54,7 @@ API REST de películas y autores con **Spring Boot 3.5.4** y **Java 21**, CRUD y
 - **Autores:** `AuthorEntity` se mapea a `authors` con PK `UUID`. `GET /authors` es paginado y ordena por `lastName` y `name`. `name` y `lastName` son obligatorios y su combinación es única → 409. `nationality`, `birthDate` y `biography` son opcionales. `POST` fuerza `is_active=true`; solo `PATCH` permite cambiar `isActive`. No hay relación con `movies` todavía.
 - La lógica de autores vive en `AuthorEntityRepository`; el flujo es `AuthorController` → `AuthorService` → `AuthorRepository` ← `AuthorEntityRepository`.
 - `RatingMapper` calcula `ratingString`; los umbrales están en esa clase.
-- Las entidades extienden `AuditableEntity` (`persistence/entity`), que a su vez extiende `BaseEntity`. `BaseEntity` aporta `id` UUID y `version`; `AuditableEntity` aporta `createdAt`/`updatedAt` con `@CreatedDate`/`@LastModifiedDate`. `@EnableJpaAuditing` vive en `config/JpaAuditingConfig`. Los campos heredados no se redeclaran en las entidades.
+- Todas las entidades extienden `BaseEntity` (`persistence/entity`), un `@MappedSuperclass` que aporta `id` UUID, `version` y `createdAt`/`updatedAt` con `@CreatedDate`/`@LastModifiedDate`. `@EnableJpaAuditing` vive en `config/JpaAuditingConfig`. Los campos heredados no se redeclaran en las entidades.
 - `version` es un `@Version` para bloqueo optimista y vive en `BaseEntity`; las columnas de auditoría usan `NOT NULL DEFAULT now()` para sobrevivir a `ddl-auto=update`.
 - `data.sql` inserta películas y autores de ejemplo solo si su tabla está vacía, y se ejecuta en cada arranque de `dev`. Los seeds usan UUID v7 literales con cast `::uuid`.
 

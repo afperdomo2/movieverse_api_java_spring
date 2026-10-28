@@ -19,7 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class AuthorEntity extends AuditableEntity {
+public class AuthorEntity extends BaseEntity {
 
     @Column(nullable = false, length = 100)
     private String name;

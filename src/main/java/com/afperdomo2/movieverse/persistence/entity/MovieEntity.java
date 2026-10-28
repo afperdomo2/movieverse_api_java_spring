@@ -21,7 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class MovieEntity extends AuditableEntity {
+public class MovieEntity extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 255)
     private String title;
