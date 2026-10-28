@@ -14,7 +14,7 @@ public class PageQuery {
     @Min(value = 1, message = "page debe ser mayor o igual a 1")
     private int page = 1;
 
-    @Schema(description = "Cantidad de películas por página", example = "10", defaultValue = "10")
+    @Schema(description = "Cantidad de registros por página", example = "10", defaultValue = "10")
     @Min(value = 1, message = "limit debe ser mayor o igual a 1")
     @Max(value = 100, message = "limit debe ser menor o igual a 100")
     private int limit = 10;

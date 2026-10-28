@@ -1,6 +1,7 @@
 package com.afperdomo2.movieverse.domain.repository;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
@@ -13,13 +14,13 @@ public interface MovieRepository {
 
     PageResponse<MovieDto> findPage(int page, int limit);
 
-    MovieDto findById(long id);
+    MovieDto findById(UUID id);
 
     MovieDto create(CreateMovieDto movieDto);
 
-    MovieDto update(long id, UpdateMovieDto changes);
+    MovieDto update(UUID id, UpdateMovieDto changes);
 
-    MovieDto patch(long id, PatchMovieDto changes);
+    MovieDto patch(UUID id, PatchMovieDto changes);
 
-    boolean delete(long id);
+    boolean delete(UUID id);
 }

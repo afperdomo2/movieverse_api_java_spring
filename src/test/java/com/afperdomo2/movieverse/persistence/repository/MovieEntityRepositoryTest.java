@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,9 @@ import com.afperdomo2.movieverse.persistence.mapper.MovieMapper;
 class MovieEntityRepositoryTest {
 
     private static final LocalDate RELEASE_DATE = LocalDate.of(2014, 11, 7);
+    private static final UUID MOVIE_ID = UUID.fromString("019b76da-d2f8-700c-8004-00000c08d6b4");
+    private static final UUID OTHER_MOVIE_ID = UUID.fromString("019b76da-bb88-7006-8002-000006046b5a");
+    private static final UUID UNKNOWN_MOVIE_ID = UUID.fromString("019b76da-ee50-7013-8ab1-0000130dfe9d");
 
     @Mock
     private CrudMovieEntity crudMovieEntity;
@@ -59,8 +63,8 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("findAll mapea todas las entidades a DTOs")
     void findAll_mapsEntitiesToDtos() {
-        List<MovieEntity> entities = List.of(movieEntity(1L, "Interstellar"), movieEntity(2L, "Inception"));
-        List<MovieDto> dtos = List.of(movieDto(1L, "Interstellar"), movieDto(2L, "Inception"));
+        List<MovieEntity> entities = List.of(movieEntity(MOVIE_ID, "Interstellar"), movieEntity(OTHER_MOVIE_ID, "Inception"));
+        List<MovieDto> dtos = List.of(movieDto(MOVIE_ID, "Interstellar"), movieDto(OTHER_MOVIE_ID, "Inception"));
         when(crudMovieEntity.findAll()).thenReturn(entities);
         when(movieMapper.toDto(entities)).thenReturn(dtos);
 
@@ -81,8 +85,8 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("findPage mapea la página, los metadatos y ordena por id")
     void findPage_mapsPageAndMetadata() {
-        List<MovieEntity> entities = List.of(movieEntity(1L, "Interstellar"));
-        List<MovieDto> dtos = List.of(movieDto(1L, "Interstellar"));
+        List<MovieEntity> entities = List.of(movieEntity(MOVIE_ID, "Interstellar"));
+        List<MovieDto> dtos = List.of(movieDto(MOVIE_ID, "Interstellar"));
         PageImpl<MovieEntity> page = new PageImpl<>(entities, PageRequest.of(0, 10, Sort.by("id").ascending()), 19);
         when(crudMovieEntity.findAll(any(Pageable.class))).thenReturn(page);
         when(movieMapper.toDto(entities)).thenReturn(dtos);
@@ -109,8 +113,8 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("findPage mapea una página posterior")
     void findPage_mapsSecondPage() {
-        List<MovieEntity> entities = List.of(movieEntity(11L, "Movie 11"));
-        List<MovieDto> dtos = List.of(movieDto(11L, "Movie 11"));
+        List<MovieEntity> entities = List.of(movieEntity(OTHER_MOVIE_ID, "Movie 11"));
+        List<MovieDto> dtos = List.of(movieDto(OTHER_MOVIE_ID, "Movie 11"));
         PageImpl<MovieEntity> page = new PageImpl<>(entities, PageRequest.of(1, 10, Sort.by("id").ascending()), 19);
         when(crudMovieEntity.findAll(any(Pageable.class))).thenReturn(page);
         when(movieMapper.toDto(entities)).thenReturn(dtos);
@@ -142,24 +146,24 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("findById devuelve el DTO cuando la entidad existe")
     void findById_returnsDto_whenEntityExists() {
-        MovieEntity entity = movieEntity(1L, "Interstellar");
-        MovieDto dto = movieDto(1L, "Interstellar");
-        when(crudMovieEntity.findById(1L)).thenReturn(Optional.of(entity));
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
+        MovieDto dto = movieDto(MOVIE_ID, "Interstellar");
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
         when(movieMapper.toDto(entity)).thenReturn(dto);
 
-        assertThat(repository.findById(1L)).isEqualTo(dto);
-        verify(crudMovieEntity).findById(1L);
+        assertThat(repository.findById(MOVIE_ID)).isEqualTo(dto);
+        verify(crudMovieEntity).findById(MOVIE_ID);
         verify(movieMapper).toDto(entity);
     }
 
     @Test
     @DisplayName("findById lanza MovieNotFoundException cuando la entidad no existe")
     void findById_throwsMovieNotFound_whenEntityDoesNotExist() {
-        when(crudMovieEntity.findById(99L)).thenReturn(Optional.empty());
+        when(crudMovieEntity.findById(UNKNOWN_MOVIE_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> repository.findById(99L))
+        assertThatThrownBy(() -> repository.findById(UNKNOWN_MOVIE_ID))
                 .isInstanceOf(MovieNotFoundException.class)
-                .hasMessageContaining("99");
+                .hasMessageContaining(UNKNOWN_MOVIE_ID.toString());
         verify(movieMapper, never()).toDto(any(MovieEntity.class));
     }
 
@@ -167,7 +171,7 @@ class MovieEntityRepositoryTest {
     @DisplayName("create guarda la entidad activa y devuelve el DTO")
     void create_savesActiveEntity() {
         CreateMovieDto request = createRequest("Interstellar");
-        MovieDto created = movieDto(1L, "Interstellar");
+        MovieDto created = movieDto(MOVIE_ID, "Interstellar");
         doAnswer(invocation -> {
             MovieEntity entity = invocation.getArgument(1);
             entity.setTitle(request.title());
@@ -185,6 +189,8 @@ class MovieEntityRepositoryTest {
         verify(crudMovieEntity).findByTitle("Interstellar");
         verify(crudMovieEntity).save(entityCaptor.capture());
         MovieEntity saved = entityCaptor.getValue();
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getId().version()).isEqualTo(7);
         assertThat(saved.isActive()).isTrue();
         assertThat(saved.getTitle()).isEqualTo("Interstellar");
         assertThat(saved.getRating()).isEqualByComparingTo("8.6");
@@ -195,7 +201,7 @@ class MovieEntityRepositoryTest {
     @DisplayName("create lanza MovieAlreadyExistsException cuando el título ya existe")
     void create_throwsMovieAlreadyExists_whenTitleExists() {
         CreateMovieDto request = createRequest("Interstellar");
-        when(crudMovieEntity.findByTitle("Interstellar")).thenReturn(movieEntity(1L, "Interstellar"));
+        when(crudMovieEntity.findByTitle("Interstellar")).thenReturn(movieEntity(MOVIE_ID, "Interstellar"));
 
         assertThatThrownBy(() -> repository.create(request))
                 .isInstanceOf(MovieAlreadyExistsException.class)
@@ -207,13 +213,13 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("update actualiza la entidad existente y devuelve el DTO")
     void update_updatesExistingEntity() {
-        MovieEntity entity = movieEntity(1L, "Interstellar");
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
         UpdateMovieDto changes = new UpdateMovieDto("Interstellar Remastered", RELEASE_DATE, 9.0);
-        MovieDto updated = movieDto(1L, "Interstellar Remastered");
-        when(crudMovieEntity.findById(1L)).thenReturn(Optional.of(entity));
+        MovieDto updated = movieDto(MOVIE_ID, "Interstellar Remastered");
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
         when(movieMapper.toDto(entity)).thenReturn(updated);
 
-        assertThat(repository.update(1L, changes)).isEqualTo(updated);
+        assertThat(repository.update(MOVIE_ID, changes)).isEqualTo(updated);
         verify(movieMapper).updateEntityFromDto(changes, entity);
         verify(crudMovieEntity).save(entity);
         assertThat(entity.isActive()).isTrue();
@@ -223,11 +229,11 @@ class MovieEntityRepositoryTest {
     @DisplayName("update lanza MovieNotFoundException cuando la entidad no existe")
     void update_throwsMovieNotFound_whenEntityDoesNotExist() {
         UpdateMovieDto changes = new UpdateMovieDto("Interstellar", RELEASE_DATE, 9.0);
-        when(crudMovieEntity.findById(99L)).thenReturn(Optional.empty());
+        when(crudMovieEntity.findById(UNKNOWN_MOVIE_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> repository.update(99L, changes))
+        assertThatThrownBy(() -> repository.update(UNKNOWN_MOVIE_ID, changes))
                 .isInstanceOf(MovieNotFoundException.class)
-                .hasMessageContaining("99");
+                .hasMessageContaining(UNKNOWN_MOVIE_ID.toString());
         verify(movieMapper, never()).updateEntityFromDto(any(UpdateMovieDto.class), any(MovieEntity.class));
         verify(crudMovieEntity, never()).save(any(MovieEntity.class));
     }
@@ -235,14 +241,14 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("patch actualiza solo el título y conserva el resto")
     void patch_updatesOnlyTitle() {
-        MovieEntity entity = movieEntity(1L, "Interstellar");
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
         PatchMovieDto changes = new PatchMovieDto(Optional.of("Interstellar Remastered"), Optional.empty(),
                 Optional.empty());
-        MovieDto dto = movieDto(1L, "Interstellar Remastered");
-        when(crudMovieEntity.findById(1L)).thenReturn(Optional.of(entity));
+        MovieDto dto = movieDto(MOVIE_ID, "Interstellar Remastered");
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
         when(movieMapper.toDto(entity)).thenReturn(dto);
 
-        assertThat(repository.patch(1L, changes)).isEqualTo(dto);
+        assertThat(repository.patch(MOVIE_ID, changes)).isEqualTo(dto);
         assertThat(entity.getTitle()).isEqualTo("Interstellar Remastered");
         assertThat(entity.getReleaseDate()).isEqualTo(RELEASE_DATE);
         assertThat(entity.getRating()).isEqualByComparingTo("8.6");
@@ -252,14 +258,14 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("patch actualiza solo la fecha y conserva el resto")
     void patch_updatesOnlyReleaseDate() {
-        MovieEntity entity = movieEntity(1L, "Interstellar");
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
         LocalDate newReleaseDate = LocalDate.of(2015, 1, 15);
         PatchMovieDto changes = new PatchMovieDto(Optional.empty(), Optional.of(newReleaseDate), Optional.empty());
-        MovieDto dto = movieDto(1L, "Interstellar");
-        when(crudMovieEntity.findById(1L)).thenReturn(Optional.of(entity));
+        MovieDto dto = movieDto(MOVIE_ID, "Interstellar");
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
         when(movieMapper.toDto(entity)).thenReturn(dto);
 
-        assertThat(repository.patch(1L, changes)).isEqualTo(dto);
+        assertThat(repository.patch(MOVIE_ID, changes)).isEqualTo(dto);
         assertThat(entity.getTitle()).isEqualTo("Interstellar");
         assertThat(entity.getReleaseDate()).isEqualTo(newReleaseDate);
         assertThat(entity.getRating()).isEqualByComparingTo("8.6");
@@ -269,13 +275,13 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("patch actualiza solo la calificación y conserva el resto")
     void patch_updatesOnlyRating() {
-        MovieEntity entity = movieEntity(1L, "Interstellar");
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
         PatchMovieDto changes = new PatchMovieDto(Optional.empty(), Optional.empty(), Optional.of(9.0));
-        MovieDto dto = movieDto(1L, "Interstellar");
-        when(crudMovieEntity.findById(1L)).thenReturn(Optional.of(entity));
+        MovieDto dto = movieDto(MOVIE_ID, "Interstellar");
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
         when(movieMapper.toDto(entity)).thenReturn(dto);
 
-        assertThat(repository.patch(1L, changes)).isEqualTo(dto);
+        assertThat(repository.patch(MOVIE_ID, changes)).isEqualTo(dto);
         assertThat(entity.getTitle()).isEqualTo("Interstellar");
         assertThat(entity.getReleaseDate()).isEqualTo(RELEASE_DATE);
         assertThat(entity.getRating()).isEqualByComparingTo("9.0");
@@ -285,15 +291,15 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("patch actualiza todos los campos enviados")
     void patch_updatesAllFields() {
-        MovieEntity entity = movieEntity(1L, "Interstellar");
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
         LocalDate newReleaseDate = LocalDate.of(2015, 1, 15);
         PatchMovieDto changes = new PatchMovieDto(Optional.of("Interstellar Remastered"), Optional.of(newReleaseDate),
                 Optional.of(9.0));
-        MovieDto dto = movieDto(1L, "Interstellar Remastered");
-        when(crudMovieEntity.findById(1L)).thenReturn(Optional.of(entity));
+        MovieDto dto = movieDto(MOVIE_ID, "Interstellar Remastered");
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
         when(movieMapper.toDto(entity)).thenReturn(dto);
 
-        repository.patch(1L, changes);
+        repository.patch(MOVIE_ID, changes);
 
         assertThat(entity.getTitle()).isEqualTo("Interstellar Remastered");
         assertThat(entity.getReleaseDate()).isEqualTo(newReleaseDate);
@@ -304,14 +310,14 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("patch actualiza solo el género y conserva el resto")
     void patch_updatesOnlyGenre() {
-        MovieEntity entity = movieEntity(1L, "Interstellar");
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
         PatchMovieDto changes = new PatchMovieDto(Optional.empty(), Optional.empty(), Optional.empty(),
                 Optional.of(Genre.COMEDY), Optional.empty());
-        MovieDto dto = movieDto(1L, "Interstellar");
-        when(crudMovieEntity.findById(1L)).thenReturn(Optional.of(entity));
+        MovieDto dto = movieDto(MOVIE_ID, "Interstellar");
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
         when(movieMapper.toDto(entity)).thenReturn(dto);
 
-        repository.patch(1L, changes);
+        repository.patch(MOVIE_ID, changes);
 
         assertThat(entity.getGenre()).isEqualTo(Genre.COMEDY);
         assertThat(entity.getTitle()).isEqualTo("Interstellar");
@@ -322,14 +328,14 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("patch desactiva la película y conserva el resto")
     void patch_updatesOnlyActive() {
-        MovieEntity entity = movieEntity(1L, "Interstellar");
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
         PatchMovieDto changes = new PatchMovieDto(Optional.empty(), Optional.empty(), Optional.empty(),
                 Optional.empty(), Optional.of(false));
-        MovieDto dto = movieDto(1L, "Interstellar");
-        when(crudMovieEntity.findById(1L)).thenReturn(Optional.of(entity));
+        MovieDto dto = movieDto(MOVIE_ID, "Interstellar");
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
         when(movieMapper.toDto(entity)).thenReturn(dto);
 
-        repository.patch(1L, changes);
+        repository.patch(MOVIE_ID, changes);
 
         assertThat(entity.isActive()).isFalse();
         assertThat(entity.getGenre()).isEqualTo(Genre.SCI_FI);
@@ -340,13 +346,13 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("patch sin campos no guarda cambios")
     void patch_withEmptyChanges_doesNotSave() {
-        MovieEntity entity = movieEntity(1L, "Interstellar");
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
         PatchMovieDto changes = new PatchMovieDto(Optional.empty(), Optional.empty(), Optional.empty());
-        MovieDto dto = movieDto(1L, "Interstellar");
-        when(crudMovieEntity.findById(1L)).thenReturn(Optional.of(entity));
+        MovieDto dto = movieDto(MOVIE_ID, "Interstellar");
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
         when(movieMapper.toDto(entity)).thenReturn(dto);
 
-        assertThat(repository.patch(1L, changes)).isEqualTo(dto);
+        assertThat(repository.patch(MOVIE_ID, changes)).isEqualTo(dto);
         verify(crudMovieEntity, never()).save(any(MovieEntity.class));
         verify(crudMovieEntity, never()).findByTitle(any());
     }
@@ -355,23 +361,23 @@ class MovieEntityRepositoryTest {
     @DisplayName("patch lanza MovieNotFoundException cuando la película no existe")
     void patch_throwsMovieNotFound_whenEntityDoesNotExist() {
         PatchMovieDto changes = new PatchMovieDto(Optional.of("Interstellar"), Optional.empty(), Optional.empty());
-        when(crudMovieEntity.findById(99L)).thenReturn(Optional.empty());
+        when(crudMovieEntity.findById(UNKNOWN_MOVIE_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> repository.patch(99L, changes))
+        assertThatThrownBy(() -> repository.patch(UNKNOWN_MOVIE_ID, changes))
                 .isInstanceOf(MovieNotFoundException.class)
-                .hasMessageContaining("99");
+                .hasMessageContaining(UNKNOWN_MOVIE_ID.toString());
         verify(crudMovieEntity, never()).save(any(MovieEntity.class));
     }
 
     @Test
     @DisplayName("patch lanza MovieAlreadyExistsException cuando el título pertenece a otra película")
     void patch_throwsMovieAlreadyExists_whenTitleBelongsToAnotherMovie() {
-        MovieEntity entity = movieEntity(1L, "Interstellar");
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
         PatchMovieDto changes = new PatchMovieDto(Optional.of("Inception"), Optional.empty(), Optional.empty());
-        when(crudMovieEntity.findById(1L)).thenReturn(Optional.of(entity));
-        when(crudMovieEntity.findByTitle("Inception")).thenReturn(movieEntity(2L, "Inception"));
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
+        when(crudMovieEntity.findByTitle("Inception")).thenReturn(movieEntity(OTHER_MOVIE_ID, "Inception"));
 
-        assertThatThrownBy(() -> repository.patch(1L, changes))
+        assertThatThrownBy(() -> repository.patch(MOVIE_ID, changes))
                 .isInstanceOf(MovieAlreadyExistsException.class)
                 .hasMessageContaining("Inception");
         assertThat(entity.getTitle()).isEqualTo("Interstellar");
@@ -381,13 +387,13 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("patch permite enviar el mismo título sin comprobar duplicados")
     void patch_allowsSameTitle() {
-        MovieEntity entity = movieEntity(1L, "Interstellar");
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
         PatchMovieDto changes = new PatchMovieDto(Optional.of("Interstellar"), Optional.empty(), Optional.empty());
-        MovieDto dto = movieDto(1L, "Interstellar");
-        when(crudMovieEntity.findById(1L)).thenReturn(Optional.of(entity));
+        MovieDto dto = movieDto(MOVIE_ID, "Interstellar");
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
         when(movieMapper.toDto(entity)).thenReturn(dto);
 
-        repository.patch(1L, changes);
+        repository.patch(MOVIE_ID, changes);
 
         assertThat(entity.getTitle()).isEqualTo("Interstellar");
         verify(crudMovieEntity, never()).findByTitle(any());
@@ -397,24 +403,24 @@ class MovieEntityRepositoryTest {
     @Test
     @DisplayName("delete elimina la película y devuelve true")
     void delete_returnsTrue_whenMovieExists() {
-        when(crudMovieEntity.existsById(1L)).thenReturn(true);
+        when(crudMovieEntity.existsById(MOVIE_ID)).thenReturn(true);
 
-        assertThat(repository.delete(1L)).isTrue();
-        verify(crudMovieEntity).deleteById(1L);
+        assertThat(repository.delete(MOVIE_ID)).isTrue();
+        verify(crudMovieEntity).deleteById(MOVIE_ID);
     }
 
     @Test
     @DisplayName("delete lanza MovieNotFoundException cuando la película no existe")
     void delete_throwsMovieNotFound_whenMovieDoesNotExist() {
-        when(crudMovieEntity.existsById(99L)).thenReturn(false);
+        when(crudMovieEntity.existsById(UNKNOWN_MOVIE_ID)).thenReturn(false);
 
-        assertThatThrownBy(() -> repository.delete(99L))
+        assertThatThrownBy(() -> repository.delete(UNKNOWN_MOVIE_ID))
                 .isInstanceOf(MovieNotFoundException.class)
-                .hasMessageContaining("99");
-        verify(crudMovieEntity, never()).deleteById(99L);
+                .hasMessageContaining(UNKNOWN_MOVIE_ID.toString());
+        verify(crudMovieEntity, never()).deleteById(UNKNOWN_MOVIE_ID);
     }
 
-    private static MovieEntity movieEntity(Long id, String title) {
+    private static MovieEntity movieEntity(UUID id, String title) {
         MovieEntity entity = new MovieEntity();
         entity.setId(id);
         entity.setTitle(title);
@@ -426,7 +432,7 @@ class MovieEntityRepositoryTest {
         return entity;
     }
 
-    private static MovieDto movieDto(Long id, String title) {
+    private static MovieDto movieDto(UUID id, String title) {
         return new MovieDto(id, title, 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD");
     }
 

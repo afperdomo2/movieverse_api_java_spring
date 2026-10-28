@@ -2,6 +2,7 @@ package com.afperdomo2.movieverse.persistence.repository;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +22,7 @@ import com.afperdomo2.movieverse.domain.repository.MovieRepository;
 import com.afperdomo2.movieverse.persistence.crud.CrudMovieEntity;
 import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
 import com.afperdomo2.movieverse.persistence.mapper.MovieMapper;
+import com.github.f4b6a3.uuid.UuidCreator;
 
 @Repository
 public class MovieEntityRepository implements MovieRepository {
@@ -54,7 +56,7 @@ public class MovieEntityRepository implements MovieRepository {
     }
 
     @Override
-    public MovieDto findById(long id) {
+    public MovieDto findById(UUID id) {
         MovieEntity movie = this.crudMovieEntity.findById(id).orElse(null);
         if (movie == null) {
             throw new MovieNotFoundException(id);
@@ -69,12 +71,13 @@ public class MovieEntityRepository implements MovieRepository {
         }
         MovieEntity newMovie = new MovieEntity();
         this.movieMapper.createEntityFromDto(movieDto, newMovie);
+        newMovie.setId(UuidCreator.getTimeOrderedEpoch());
         this.crudMovieEntity.save(newMovie);
         return this.movieMapper.toDto(newMovie);
     }
 
     @Override
-    public MovieDto update(long id, UpdateMovieDto changes) {
+    public MovieDto update(UUID id, UpdateMovieDto changes) {
         MovieEntity movie = this.crudMovieEntity.findById(id).orElse(null);
         if (movie == null) {
             throw new MovieNotFoundException(id);
@@ -89,7 +92,7 @@ public class MovieEntityRepository implements MovieRepository {
 
     @Override
     @Transactional
-    public MovieDto patch(long id, PatchMovieDto changes) {
+    public MovieDto patch(UUID id, PatchMovieDto changes) {
         MovieEntity movie = this.crudMovieEntity.findById(id).orElse(null);
         if (movie == null) {
             throw new MovieNotFoundException(id);
@@ -113,7 +116,7 @@ public class MovieEntityRepository implements MovieRepository {
         return this.movieMapper.toDto(movie);
     }
 
-    private void updateTitle(long id, MovieEntity movie, String title) {
+    private void updateTitle(UUID id, MovieEntity movie, String title) {
         if (title.equals(movie.getTitle())) {
             return;
         }
@@ -125,7 +128,7 @@ public class MovieEntityRepository implements MovieRepository {
     }
 
     @Override
-    public boolean delete(long id) {
+    public boolean delete(UUID id) {
         if (!this.crudMovieEntity.existsById(id)) {
             throw new MovieNotFoundException(id);
         }

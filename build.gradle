@@ -23,6 +23,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
 
+	// UUID v7 (RFC 9562) para identificadores ordenables por fecha
+	implementation 'com.github.f4b6a3:uuid-creator:6.1.1'
+
 	// Spring AI
 	implementation platform('org.springframework.ai:spring-ai-bom:1.1.8')
 	implementation 'org.springframework.ai:spring-ai-starter-model-openai'

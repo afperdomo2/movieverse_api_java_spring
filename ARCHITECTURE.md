@@ -16,36 +16,46 @@ Documento técnico de la API. Para instalación, ejecución y configuración, co
 flowchart TB
   subgraph Web["Capa web"]
     MC[MovieController]
+    AC[AuthorController]
     HC[HelloController]
     EH[RestExceptionHandler]
   end
 
   subgraph Domain["Capa de dominio"]
     MS[MovieService]
+    AS[AuthorService]
     MR[MovieRepository]
+    AR[AuthorRepository]
     AI[MovieverseAiService]
-    DTO[DTOs y RatingString]
+    DTO[DTOs, Genre y RatingString]
   end
 
   subgraph Persistence["Capa de persistencia"]
     PER[MovieEntityRepository]
-    CRUD[CrudMovieEntity]
-    MAP[MovieMapper / RatingMapper]
-    ENT[MovieEntity]
+    AER[AuthorEntityRepository]
+    CRUD[CrudMovieEntity / CrudAuthorEntity]
+    MAP[MovieMapper / AuthorMapper / RatingMapper]
+    ENT[MovieEntity / AuthorEntity]
   end
 
   DB[(PostgreSQL)]
 
   MC --> MS
   MC --> AI
+  AC --> AS
   HC --> AI
   MS --> MR
+  AS --> AR
   MR -. implementada por .-> PER
+  AR -. implementada por .-> AER
   PER --> CRUD
+  AER --> CRUD
   PER --> MAP
+  AER --> MAP
   CRUD --> ENT
   ENT --> DB
   MS --> DTO
+  AS --> DTO
   AI -. herramienta @Tool .-> MS
 ```
 
@@ -57,29 +67,50 @@ src/main/java/com/afperdomo2/movieverse/
 ├── config/
 │   └── AiHttpConfig.java
 ├── domain/
+│   ├── Genre.java
 │   ├── RatingString.java
 │   ├── dto/
+│   │   ├── AuthorDto.java
+│   │   ├── CreateAuthorDto.java
 │   │   ├── CreateMovieDto.java
 │   │   ├── MovieDto.java
+│   │   ├── PageQuery.java
+│   │   ├── PageResponse.java
+│   │   ├── PatchAuthorDto.java
+│   │   ├── PatchMovieDto.java
 │   │   ├── SuggestionRequestDto.java
+│   │   ├── UpdateAuthorDto.java
 │   │   └── UpdateMovieDto.java
 │   ├── exception/
+│   │   ├── AuthorAlreadyExistsException.java
+│   │   ├── AuthorNotFoundException.java
 │   │   ├── MovieAlreadyExistsException.java
 │   │   └── MovieNotFoundException.java
 │   ├── repository/
+│   │   ├── AuthorRepository.java
 │   │   └── MovieRepository.java
 │   └── service/
+│       ├── AuthorService.java
 │       ├── MovieService.java
 │       └── MovieverseAiService.java
 ├── persistence/
-│   ├── crud/CrudMovieEntity.java
-│   ├── entity/MovieEntity.java
+│   ├── converter/GenreConverter.java
+│   ├── crud/
+│   │   ├── CrudAuthorEntity.java
+│   │   └── CrudMovieEntity.java
+│   ├── entity/
+│   │   ├── AuthorEntity.java
+│   │   └── MovieEntity.java
 │   ├── mapper/
+│   │   ├── AuthorMapper.java
 │   │   ├── MovieMapper.java
 │   │   └── RatingMapper.java
-│   └── repository/MovieEntityRepository.java
+│   └── repository/
+│       ├── AuthorEntityRepository.java
+│       └── MovieEntityRepository.java
 └── web/
     ├── controller/
+    │   ├── AuthorController.java
     │   ├── HelloController.java
     │   └── MovieController.java
     └── exception/
@@ -108,7 +139,11 @@ sequenceDiagram
   W-->>C: 201 Created
 ```
 
-`MovieService` depende de la interfaz `MovieRepository`; Spring inyecta `MovieEntityRepository`, que es la implementación de persistencia.
+`MovieService` depende de la interfaz `MovieRepository`; Spring inyecta `MovieEntityRepository`, que es la implementación de persistencia. El CRUD de autores repite exactamente el mismo flujo: `AuthorController` → `AuthorService` → `AuthorRepository` ← `AuthorEntityRepository`.
+
+### Identificadores UUID v7
+
+`MovieEntity` y `AuthorEntity` usan `UUID` como PK. El valor se genera en la aplicación con `UuidCreator.getTimeOrderedEpoch()` (`uuid-creator`) al crear el registro. No se usa `@GeneratedValue` ni una función de PostgreSQL: el tipo `uuid` existe en PostgreSQL 16, pero `uuidv7()` solo está disponible de forma nativa desde PostgreSQL 18.
 
 ### Paginación del listado
 
@@ -117,18 +152,23 @@ sequenceDiagram
 - Una página fuera de rango devuelve `items` vacío con HTTP 200.
 - Parámetros inválidos devuelven HTTP 400.
 - `MovieService.findAll()` se mantiene sin paginar porque es la herramienta `@Tool` que usa la IA.
+- `GET /authors` reutiliza `PageQuery` y `PageResponse`, y ordena por `lastName` y luego por `name`.
 
 ## Componentes principales
 
 | Componente | Responsabilidad |
 |---|---|
 | `MovieController` | Expone `/movies`, valida la entrada y traduce a códigos HTTP |
+| `AuthorController` | Expone `/authors` con CRUD paginado |
 | `HelloController` | Expone `/hello` para probar la integración con IA |
 | `MovieService` | Orquesta las operaciones de negocio y expone `findAll` como herramienta de IA |
+| `AuthorService` | Orquesta las operaciones de autores |
 | `MovieRepository` | Contrato de persistencia del dominio |
+| `AuthorRepository` | Contrato de persistencia de autores |
 | `MovieEntityRepository` | Implementa el contrato usando `CrudMovieEntity` y MapStruct |
-| `CrudMovieEntity` | Repositorio Spring Data (`JpaRepository`) |
-| `MovieMapper` | Convierte entre `MovieEntity` y DTOs |
+| `AuthorEntityRepository` | Implementa el CRUD de autores con `CrudAuthorEntity` y MapStruct |
+| `CrudMovieEntity` / `CrudAuthorEntity` | Repositorios Spring Data (`JpaRepository`) |
+| `MovieMapper` / `AuthorMapper` | Convierten entre entidades y DTOs |
 | `RatingMapper` | Calcula `ratingString` a partir del rating numérico |
 | `RestExceptionHandler` | Traduce excepciones de dominio a respuestas HTTP |
 | `MovieverseAiService` | Clase `@Service` que encapsula un `ChatClient` de Spring AI |
@@ -141,7 +181,11 @@ sequenceDiagram
 | `MovieDto` | Respuesta completa de una película |
 | `CreateMovieDto` | Entrada para crear; incluye validaciones |
 | `UpdateMovieDto` | Entrada para actualizar título, fecha y rating |
-| `PatchMovieDto` | Entrada para actualizar parcialmente título, fecha y rating; usa `Optional` |
+| `PatchMovieDto` | Entrada para actualizar parcialmente una película; usa `Optional` |
+| `AuthorDto` | Respuesta completa de un autor |
+| `CreateAuthorDto` | Entrada para crear un autor |
+| `UpdateAuthorDto` | Entrada para actualizar nombre, apellido, nacionalidad, nacimiento y biografía |
+| `PatchAuthorDto` | Entrada para actualizar parcialmente un autor; incluye `isActive` |
 | `PageQuery` | Parámetros de paginación `page` (1-based) y `limit` (máximo 100) |
 | `PageResponse<T>` | Respuesta paginada con `items`, página actual y metadatos |
 | `SuggestionRequestDto` | Preferencias del usuario para generar sugerencias |
@@ -153,6 +197,15 @@ sequenceDiagram
 - `genre`: obligatorio.
 - `releaseDate`: obligatorio y no futuro.
 - `rating`: obligatorio, entre 0 y 9.
+
+### Validaciones de autores
+
+- `name`: obligatorio, máximo 100 caracteres.
+- `lastName`: obligatorio, máximo 100 caracteres.
+- `nationality`: opcional, máximo 100 caracteres.
+- `birthDate`: opcional y no futuro.
+- `biography`: opcional, máximo 1000 caracteres.
+- La combinación `name + lastName` es única; si se repite devuelve `409`.
 
 ### Categorías de rating
 
@@ -172,7 +225,7 @@ La entidad `MovieEntity` se mapea a la tabla `movies`:
 
 | Campo | Tipo | Observación |
 |---|---|---|
-| `id` | `BIGINT` | Autoincremental |
+| `id` | `UUID` | UUID v7 generado en la aplicación |
 | `title` | `VARCHAR` | Único y obligatorio |
 | `duration` | `INTEGER` | Minutos |
 | `genre` | `VARCHAR(50)` | Obligatorio; enum `Genre` con 20 valores |
@@ -188,15 +241,37 @@ Reglas relevantes:
 - La auditoría usa Spring Data JPA (`@CreatedDate`/`@LastModifiedDate` + `@EnableJpaAuditing`). Las columnas son `NOT NULL DEFAULT now()` para que `ddl-auto=update` pueda añadirlas sobre tablas con datos.
 - `version` implementa bloqueo optimista: Hibernate lo incrementa en cada actualización y lanza `OptimisticLockException` si hay conflicto.
 - La entidad usa Lombok (`@Getter`, `@Setter`, `@NoArgsConstructor`); no se usa `@Data` para evitar `equals`/`hashCode`/`toString` inadecuados en JPA.
-- `create` deja `is_active = true` y la base de datos genera el ID.
+- `create` deja `is_active = true` y genera el ID con `UuidCreator.getTimeOrderedEpoch()`.
 - `CreateMovieDto` no acepta `id` ni `isActive`; el género es el enum `Genre`. Valida título ≤ 255 y duración ≤ 600 minutos.
 - `update` (PUT) actualiza título, fecha y rating; `releaseDate` es obligatoria y `rating` sigue siendo opcional. No cambia `genre` ni `isActive`.
 - `patch` (PATCH) puede actualizar título, fecha, rating, `genre` e `isActive`. Un body vacío devuelve 400; un título duplicado devuelve 409; la operación es `@Transactional`.
 - Un género inválido o un body ilegible devuelve 400.
 - Un título duplicado lanza `MovieAlreadyExistsException` → HTTP 409.
 - Un ID inexistente lanza `MovieNotFoundException` → HTTP 404.
-- `data.sql` inserta películas de ejemplo solo si la tabla está vacía.
+- `data.sql` inserta películas y autores de ejemplo solo si su tabla está vacía. Los seeds usan UUID v7 literales con cast `::uuid`.
 - El perfil `dev` usa `spring.jpa.hibernate.ddl-auto=update`; no hay migraciones versionadas.
+
+La entidad `AuthorEntity` se mapea a la tabla `authors`:
+
+| Campo | Tipo | Observación |
+|---|---|---|
+| `id` | `UUID` | UUID v7 generado en la aplicación |
+| `name` | `VARCHAR(100)` | Obligatorio |
+| `last_name` | `VARCHAR(100)` | Obligatorio; junto a `name` forma una clave única |
+| `nationality` | `VARCHAR(100)` | Opcional |
+| `birth_date` | `DATE` | Opcional |
+| `biography` | `VARCHAR(1000)` | Opcional |
+| `is_active` | `BOOLEAN` | `true` por defecto; editable por PATCH |
+| `version` | `BIGINT` | Bloqueo optimista (`@Version`), por defecto `0` |
+| `created_at` / `updated_at` | `TIMESTAMP WITH TIME ZONE` | Auditoría |
+
+Reglas de autores:
+
+- `AuthorEntityRepository` valida duplicados de `name + lastName` en `create`, `update` y `patch` → `AuthorAlreadyExistsException` → 409.
+- Un ID inexistente lanza `AuthorNotFoundException` → 404.
+- `POST` fuerza `is_active = true`; `PUT` no cambia `isActive`; `PATCH` sí puede cambiarlo.
+- `DELETE` es un borrado físico.
+- No existe relación entre `authors` y `movies` en esta versión.
 
 MapStruct genera las implementaciones al compilar. Si se cambia un mapper y el comportamiento no se actualiza, ejecuta `clean` antes de recompilar.
 
@@ -242,20 +317,24 @@ Para producción, configura las credenciales mediante variables de entorno. El a
 
 ## Cómo extender el CRUD
 
-Para añadir un campo o una operación:
+Para añadir un campo o una operación a una entidad existente:
 
 1. Actualiza el DTO correspondiente en `domain/dto`.
-2. Modifica la interfaz `domain/repository/MovieRepository`.
-3. Implementa el cambio en `persistence/repository/MovieEntityRepository`.
-4. Ajusta `persistence/mapper/MovieMapper` si cambian los campos.
-5. Expón la operación en `web/controller/MovieController`.
-6. Ejecuta `.\gradlew.bat build` con PostgreSQL levantado.
+2. Modifica la interfaz `domain/repository/{Movie|Author}Repository`.
+3. Implementa el cambio en `persistence/repository/{Movie|Author}EntityRepository`.
+4. Ajusta `persistence/mapper/{Movie|Author}Mapper` si cambian los campos.
+5. Expón la operación en `web/controller/{Movie|Author}Controller`.
+6. Añade o actualiza el seed en `data.sql` si aplica.
+7. Ejecuta `.\gradlew.bat test` y `.\gradlew.bat bootRun`.
+
+Para una entidad nueva, replica el bloque completo: `domain/dto`, excepción de dominio, interfaz de repositorio, servicio, `AuthorEntity`-style entity, `Crud*Entity`, mapper, repositorio de persistencia y controlador.
 
 ## Limitaciones conocidas
 
-- Solo existe un test de contexto (`contextLoads`); no hay tests unitarios ni de integración por caso de uso.
-- No hay Flyway/Liquibase: el esquema se actualiza con `ddl-auto=update`.
+- No hay relación entre autores y películas; se añadirá en una fase posterior.
+- No hay Flyway/Liquibase: el esquema se actualiza con `ddl-auto=update`. Cambiar el tipo de una PK existente requiere borrar y recrear la tabla.
+- PostgreSQL 16 no tiene `uuidv7()` nativo; el UUID v7 se genera en la aplicación con `uuid-creator`.
 - El perfil `prod` tiene configuración sensible embebida; debería migrarse a variables de entorno.
 - Los endpoints de IA no funcionan con la clave de demo.
 - `docker-compose.yaml` solo levanta PostgreSQL, no la aplicación.
-- MapStruct ignora `id`, `duration`, `genre`, `active`, `version` y auditoría en `updateEntityFromDto`; es intencional.
+- La unicidad de autores es sensible a mayúsculas (`Christopher Nolan` y `christopher nolan` se consideran distintos).

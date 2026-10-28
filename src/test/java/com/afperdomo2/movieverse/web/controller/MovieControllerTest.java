@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,9 @@ import com.afperdomo2.movieverse.domain.service.MovieverseAiService;
 class MovieControllerTest {
 
     private static final LocalDate RELEASE_DATE = LocalDate.of(2014, 11, 7);
+    private static final UUID MOVIE_ID = UUID.fromString("019b76da-d2f8-700c-8004-00000c08d6b4");
+    private static final UUID OTHER_MOVIE_ID = UUID.fromString("019b76da-bb88-7006-8002-000006046b5a");
+    private static final UUID UNKNOWN_MOVIE_ID = UUID.fromString("019b76da-ee50-7013-8ab1-0000130dfe9d");
 
     @Mock
     private MovieService movieService;
@@ -47,7 +51,7 @@ class MovieControllerTest {
     void findAll_returnsOkWithPage() {
         PageQuery query = new PageQuery();
         PageResponse<MovieDto> page = new PageResponse<>(
-                List.of(movieDto(1L, "Interstellar")), 1, 10, 19, 2, true, false);
+                List.of(movieDto(MOVIE_ID, "Interstellar")), 1, 10, 19, 2, true, false);
         when(movieService.findPage(1, 10)).thenReturn(page);
 
         ResponseEntity<PageResponse<MovieDto>> response = movieController.findAll(query);
@@ -64,7 +68,7 @@ class MovieControllerTest {
         query.setPage(2);
         query.setLimit(5);
         PageResponse<MovieDto> page = new PageResponse<>(
-                List.of(movieDto(6L, "Movie 6")), 2, 5, 19, 4, true, true);
+                List.of(movieDto(OTHER_MOVIE_ID, "Movie 6")), 2, 5, 19, 4, true, true);
         when(movieService.findPage(2, 5)).thenReturn(page);
 
         ResponseEntity<PageResponse<MovieDto>> response = movieController.findAll(query);
@@ -77,22 +81,22 @@ class MovieControllerTest {
     @Test
     @DisplayName("findById devuelve 200 cuando la película existe")
     void findById_returnsOk_whenMovieExists() {
-        MovieDto movie = movieDto(1L, "Interstellar");
-        when(movieService.findById(1L)).thenReturn(movie);
+        MovieDto movie = movieDto(MOVIE_ID, "Interstellar");
+        when(movieService.findById(MOVIE_ID)).thenReturn(movie);
 
-        ResponseEntity<MovieDto> response = movieController.findById(1L);
+        ResponseEntity<MovieDto> response = movieController.findById(MOVIE_ID);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(movie);
-        verify(movieService).findById(1L);
+        verify(movieService).findById(MOVIE_ID);
     }
 
     @Test
     @DisplayName("findById devuelve 404 cuando el servicio devuelve null")
     void findById_returnsNotFound_whenServiceReturnsNull() {
-        when(movieService.findById(99L)).thenReturn(null);
+        when(movieService.findById(UNKNOWN_MOVIE_ID)).thenReturn(null);
 
-        ResponseEntity<MovieDto> response = movieController.findById(99L);
+        ResponseEntity<MovieDto> response = movieController.findById(UNKNOWN_MOVIE_ID);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNull();
@@ -102,7 +106,7 @@ class MovieControllerTest {
     @DisplayName("create devuelve 201 con la película creada")
     void create_returnsCreated() {
         CreateMovieDto request = new CreateMovieDto("Interstellar", 169, Genre.SCI_FI, RELEASE_DATE, 8.6);
-        MovieDto created = movieDto(1L, "Interstellar");
+        MovieDto created = movieDto(MOVIE_ID, "Interstellar");
         when(movieService.create(request)).thenReturn(created);
 
         ResponseEntity<MovieDto> response = movieController.create(request);
@@ -116,23 +120,23 @@ class MovieControllerTest {
     @DisplayName("update devuelve 200 cuando la película existe")
     void update_returnsOk_whenMovieExists() {
         UpdateMovieDto changes = new UpdateMovieDto("Interstellar", RELEASE_DATE, 9.0);
-        MovieDto updated = movieDto(1L, "Interstellar");
-        when(movieService.update(1L, changes)).thenReturn(updated);
+        MovieDto updated = movieDto(MOVIE_ID, "Interstellar");
+        when(movieService.update(MOVIE_ID, changes)).thenReturn(updated);
 
-        ResponseEntity<MovieDto> response = movieController.update(1L, changes);
+        ResponseEntity<MovieDto> response = movieController.update(MOVIE_ID, changes);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(updated);
-        verify(movieService).update(1L, changes);
+        verify(movieService).update(MOVIE_ID, changes);
     }
 
     @Test
     @DisplayName("update devuelve 404 cuando el servicio devuelve null")
     void update_returnsNotFound_whenServiceReturnsNull() {
         UpdateMovieDto changes = new UpdateMovieDto("Interstellar", RELEASE_DATE, 9.0);
-        when(movieService.update(99L, changes)).thenReturn(null);
+        when(movieService.update(UNKNOWN_MOVIE_ID, changes)).thenReturn(null);
 
-        ResponseEntity<MovieDto> response = movieController.update(99L, changes);
+        ResponseEntity<MovieDto> response = movieController.update(UNKNOWN_MOVIE_ID, changes);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNull();
@@ -143,37 +147,37 @@ class MovieControllerTest {
     void patch_returnsOkWithUpdatedMovie() {
         PatchMovieDto changes = new PatchMovieDto(Optional.of("Interstellar Remastered"), Optional.empty(),
                 Optional.of(9.0));
-        MovieDto updated = movieDto(1L, "Interstellar Remastered");
-        when(movieService.patch(1L, changes)).thenReturn(updated);
+        MovieDto updated = movieDto(MOVIE_ID, "Interstellar Remastered");
+        when(movieService.patch(MOVIE_ID, changes)).thenReturn(updated);
 
-        ResponseEntity<MovieDto> response = movieController.patch(1L, changes);
+        ResponseEntity<MovieDto> response = movieController.patch(MOVIE_ID, changes);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(updated);
-        verify(movieService).patch(1L, changes);
+        verify(movieService).patch(MOVIE_ID, changes);
     }
 
     @Test
     @DisplayName("delete devuelve 204 cuando la película se elimina")
     void delete_returnsNoContent_whenMovieIsDeleted() {
-        when(movieService.delete(1L)).thenReturn(true);
+        when(movieService.delete(MOVIE_ID)).thenReturn(true);
 
-        ResponseEntity<Void> response = movieController.delete(1L);
+        ResponseEntity<Void> response = movieController.delete(MOVIE_ID);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
         assertThat(response.getBody()).isNull();
-        verify(movieService).delete(1L);
+        verify(movieService).delete(MOVIE_ID);
     }
 
     @Test
     @DisplayName("delete devuelve 404 cuando el servicio devuelve false")
     void delete_returnsNotFound_whenServiceReturnsFalse() {
-        when(movieService.delete(99L)).thenReturn(false);
+        when(movieService.delete(UNKNOWN_MOVIE_ID)).thenReturn(false);
 
-        ResponseEntity<Void> response = movieController.delete(99L);
+        ResponseEntity<Void> response = movieController.delete(UNKNOWN_MOVIE_ID);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        verify(movieService).delete(99L);
+        verify(movieService).delete(UNKNOWN_MOVIE_ID);
     }
 
     @Test
@@ -189,7 +193,7 @@ class MovieControllerTest {
         verify(movieverseAiService).generateMoviesSuggestion(request.userPreferences());
     }
 
-    private static MovieDto movieDto(Long id, String title) {
+    private static MovieDto movieDto(UUID id, String title) {
         return new MovieDto(id, title, 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD");
     }
 }

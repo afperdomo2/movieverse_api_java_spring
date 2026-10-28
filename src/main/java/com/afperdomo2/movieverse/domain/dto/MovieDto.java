@@ -1,12 +1,13 @@
 package com.afperdomo2.movieverse.domain.dto;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import com.afperdomo2.movieverse.domain.Genre;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record MovieDto(
-        Long id,
+        UUID id,
         String title,
         Integer duration,
         Genre genre,

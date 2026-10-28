@@ -37,11 +37,13 @@ API REST para la gestión de películas, construida con **Spring Boot 3.5.4** y 
 <a id="descripcion-general"></a>
 ## 1. 🎬 Descripción general
 
-Movieverse API expone un catálogo de películas y permite crear, consultar, actualizar y eliminar registros. La aplicación usa una arquitectura hexagonal: los controladores REST dependen de servicios de dominio, y la persistencia se implementa detrás de una interfaz de repositorio.
+Movieverse API expone un catálogo de películas y autores, y permite crear, consultar, actualizar y eliminar registros. La aplicación usa una arquitectura hexagonal: los controladores REST dependen de servicios de dominio, y la persistencia se implementa detrás de una interfaz de repositorio.
 
 **✨ Características principales**
 
 - CRUD completo de películas.
+- CRUD completo de autores, sin relación con películas por ahora.
+- Identificadores UUID v7 (ordenables por fecha) generados en la aplicación.
 - Validación de entrada con Bean Validation.
 - Persistencia en PostgreSQL con Spring Data JPA.
 - Mapeo entre entidades y DTOs con MapStruct.
@@ -65,6 +67,7 @@ Movieverse API expone un catálogo de películas y permite crear, consultar, act
 | OpenAI `gpt-4o-mini` | Modelo de sugerencias |
 | MapStruct 1.6.3 | Mapeo entidad/DTO |
 | Lombok 1.18.38 | Getters/setters de entidades |
+| uuid-creator 6.1.1 | Generación de UUID v7 (RFC 9562) |
 | SpringDoc OpenAPI 2.8.9 | Swagger UI |
 | Gradle 8.14.3 | Build y dependencias |
 | Docker Compose | PostgreSQL local |
@@ -229,7 +232,15 @@ Las rutas son relativas al contexto `/movieverse/api`:
 | `PATCH` | `/movies/{id}` | Actualizar parcialmente una película |
 | `DELETE` | `/movies/{id}` | Eliminar una película |
 | `POST` | `/movies/suggestion` | Generar sugerencias con IA |
+| `GET` | `/authors?page=1&limit=10` | Listar autores (paginado) |
+| `GET` | `/authors/{id}` | Obtener un autor |
+| `POST` | `/authors` | Crear un autor |
+| `PUT` | `/authors/{id}` | Actualizar un autor |
+| `PATCH` | `/authors/{id}` | Actualizar parcialmente un autor |
+| `DELETE` | `/authors/{id}` | Eliminar un autor |
 | `GET` | `/hello` | Saludo generado con IA |
+
+Los identificadores de películas y autores son **UUID v7**. Se generan en la aplicación y se devuelven en formato estándar, por ejemplo `019b76da-d2f8-700c-8004-00000c08d6b4`.
 
 Ejemplo de sugerencia:
 
@@ -269,7 +280,7 @@ GET /movieverse/api/movies?page=1&limit=10
 Ejemplo de actualización parcial:
 
 ```http
-PATCH /movieverse/api/movies/1
+PATCH /movieverse/api/movies/019b76da-d2f8-700c-8004-00000c08d6b4
 Content-Type: application/json
 
 {
@@ -278,6 +289,55 @@ Content-Type: application/json
 ```
 
 > El PATCH solo modifica los campos enviados. Un body vacío devuelve `400`; los campos omitidos o enviados como `null` se dejan como están.
+
+**Autores**
+
+El CRUD de autores es independiente de las películas. `GET /authors` está paginado y ordena por apellido y nombre.
+
+```http
+POST /movieverse/api/authors
+Content-Type: application/json
+
+{
+  "name": "Christopher",
+  "lastName": "Nolan",
+  "nationality": "British-American",
+  "birthDate": "1970-07-30",
+  "biography": "Director, guionista y productor."
+}
+```
+
+Respuesta `201 Created`:
+
+```json
+{
+  "id": "019b7c01-0bd0-7003-a001-0000030235ad",
+  "name": "Christopher",
+  "lastName": "Nolan",
+  "nationality": "British-American",
+  "birthDate": "1970-07-30",
+  "biography": "Director, guionista y productor.",
+  "isActive": true
+}
+```
+
+- `name` y `lastName` son obligatorios.
+- `nationality`, `birthDate` y `biography` son opcionales.
+- Un autor con el mismo `name` y `lastName` devuelve `409`.
+- `PATCH` acepta además `isActive` para activar o desactivar el autor.
+- Solo `POST`, `PUT` y `PATCH` modifican datos; `DELETE` es un borrado físico.
+
+Ejemplo de actualización parcial de un autor:
+
+```http
+PATCH /movieverse/api/authors/019b7c01-0bd0-7003-a001-0000030235ad
+Content-Type: application/json
+
+{
+  "nationality": "British",
+  "isActive": false
+}
+```
 
 <a id="configuracion"></a>
 ## 7. ⚙️ Configuración

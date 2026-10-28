@@ -10,7 +10,10 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import com.afperdomo2.movieverse.domain.exception.AuthorAlreadyExistsException;
+import com.afperdomo2.movieverse.domain.exception.AuthorNotFoundException;
 import com.afperdomo2.movieverse.domain.exception.MovieAlreadyExistsException;
 import com.afperdomo2.movieverse.domain.exception.MovieNotFoundException;
 
@@ -29,10 +32,29 @@ public class RestExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    @ExceptionHandler(AuthorAlreadyExistsException.class)
+    public ResponseEntity<Error> handleAuthorAlreadyExists(AuthorAlreadyExistsException ex) {
+        Error error = new Error("AuthorAlreadyExists", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(AuthorNotFoundException.class)
+    public ResponseEntity<Error> handleAuthorNotFound(AuthorNotFoundException ex) {
+        Error error = new Error("AuthorNotFound", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Error> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        Error error = new Error("InvalidRequest",
+                "El valor '" + ex.getValue() + "' no es válido para el parámetro '" + ex.getName() + "'.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<Error> handleOptimisticLock(ObjectOptimisticLockingFailureException ex) {
         Error error = new Error("OptimisticLockingFailure",
-                "La película fue modificada por otra operación. Vuelve a intentarlo.");
+                "El registro fue modificado por otra operación. Vuelve a intentarlo.");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 

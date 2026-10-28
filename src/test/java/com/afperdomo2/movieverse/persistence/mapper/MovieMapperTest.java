@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,8 @@ import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
 class MovieMapperTest {
 
     private static final LocalDate RELEASE_DATE = LocalDate.of(2014, 11, 7);
+    private static final UUID MOVIE_ID = UUID.fromString("019b76da-d2f8-700c-8004-00000c08d6b4");
+    private static final UUID OTHER_MOVIE_ID = UUID.fromString("019b76da-bb88-7006-8002-000006046b5a");
 
     private final MovieMapper mapper = Mappers.getMapper(MovieMapper.class);
 
@@ -30,7 +33,7 @@ class MovieMapperTest {
 
         MovieDto dto = mapper.toDto(entity);
 
-        assertThat(dto.id()).isEqualTo(1L);
+        assertThat(dto.id()).isEqualTo(MOVIE_ID);
         assertThat(dto.title()).isEqualTo("Interstellar");
         assertThat(dto.duration()).isEqualTo(169);
         assertThat(dto.genre()).isEqualTo(Genre.SCI_FI);
@@ -61,7 +64,7 @@ class MovieMapperTest {
     @Test
     @DisplayName("toDto mapea una colección de entidades")
     void toDto_mapsEntityCollection() {
-        List<MovieDto> dtos = mapper.toDto(List.of(movieEntity(), movieEntity(2L, "Inception")));
+        List<MovieDto> dtos = mapper.toDto(List.of(movieEntity(), movieEntity(OTHER_MOVIE_ID, "Inception")));
 
         assertThat(dtos).hasSize(2);
         assertThat(dtos).extracting(MovieDto::title).containsExactly("Interstellar", "Inception");
@@ -70,11 +73,11 @@ class MovieMapperTest {
     @Test
     @DisplayName("toEntity mapea todos los campos del DTO")
     void toEntity_mapsAllFields() {
-        MovieDto dto = new MovieDto(1L, "Interstellar", 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD");
+        MovieDto dto = new MovieDto(MOVIE_ID, "Interstellar", 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD");
 
         MovieEntity entity = mapper.toEntity(dto);
 
-        assertThat(entity.getId()).isEqualTo(1L);
+        assertThat(entity.getId()).isEqualTo(MOVIE_ID);
         assertThat(entity.getTitle()).isEqualTo("Interstellar");
         assertThat(entity.getDuration()).isEqualTo(169);
         assertThat(entity.getGenre()).isEqualTo(Genre.SCI_FI);
@@ -86,7 +89,7 @@ class MovieMapperTest {
     @Test
     @DisplayName("toEntity no establece los campos de auditoría ni la versión")
     void toEntity_doesNotSetAuditOrVersionFields() {
-        MovieDto dto = new MovieDto(1L, "Interstellar", 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD");
+        MovieDto dto = new MovieDto(MOVIE_ID, "Interstellar", 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD");
 
         MovieEntity entity = mapper.toEntity(dto);
 
@@ -136,7 +139,7 @@ class MovieMapperTest {
         mapper.createEntityFromDto(
                 new CreateMovieDto("Interstellar", 169, Genre.SCI_FI, RELEASE_DATE, 8.6), entity);
 
-        assertThat(entity.getId()).isEqualTo(1L);
+        assertThat(entity.getId()).isEqualTo(MOVIE_ID);
         assertThat(entity.isActive()).isTrue();
         assertThat(entity.getCreatedAt()).isEqualTo(createdAt);
         assertThat(entity.getUpdatedAt()).isEqualTo(updatedAt);
@@ -187,10 +190,10 @@ class MovieMapperTest {
     }
 
     private static MovieEntity movieEntity() {
-        return movieEntity(1L, "Interstellar");
+        return movieEntity(MOVIE_ID, "Interstellar");
     }
 
-    private static MovieEntity movieEntity(Long id, String title) {
+    private static MovieEntity movieEntity(UUID id, String title) {
         MovieEntity entity = new MovieEntity();
         entity.setId(id);
         entity.setTitle(title);

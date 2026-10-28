@@ -1,5 +1,7 @@
 package com.afperdomo2.movieverse.web.controller;
 
+import java.util.UUID;
+
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +61,7 @@ public class MovieController {
             @ApiResponse(responseCode = "404", description = "Película no encontrada", content = @Content())
     })
     public ResponseEntity<MovieDto> findById(
-            @Parameter(description = "Identificador de la película", example = "1") @PathVariable("id") long id) {
+            @Parameter(description = "Identificador de la película", example = "019b76da-a800-7001-8aab-00000100bc8f") @PathVariable("id") UUID id) {
         MovieDto movie = this.movieService.findById(id);
         if (movie == null) {
             return ResponseEntity.notFound().build();
@@ -84,7 +86,7 @@ public class MovieController {
             @ApiResponse(responseCode = "409", description = "Conflicto en la solicitud", content = @Content())
     })
     public ResponseEntity<MovieDto> update(
-            @Parameter(description = "Identificador de la película", example = "1") @PathVariable("id") long id,
+            @Parameter(description = "Identificador de la película", example = "019b76da-a800-7001-8aab-00000100bc8f") @PathVariable("id") UUID id,
             @RequestBody @Valid UpdateMovieDto changes) {
         MovieDto updatedMovie = this.movieService.update(id, changes);
         if (updatedMovie == null) {
@@ -101,7 +103,7 @@ public class MovieController {
             @ApiResponse(responseCode = "409", description = "Conflicto en la solicitud", content = @Content())
     })
     public ResponseEntity<MovieDto> patch(
-            @Parameter(description = "Identificador de la película", example = "1") @PathVariable("id") long id,
+            @Parameter(description = "Identificador de la película", example = "019b76da-a800-7001-8aab-00000100bc8f") @PathVariable("id") UUID id,
             @RequestBody @Valid PatchMovieDto changes) {
         return ResponseEntity.ok(this.movieService.patch(id, changes));
     }
@@ -112,7 +114,7 @@ public class MovieController {
             @ApiResponse(responseCode = "404", description = "Película no encontrada", content = @Content())
     })
     public ResponseEntity<Void> delete(
-            @Parameter(description = "Identificador de la película", example = "9") @PathVariable("id") long id) {
+            @Parameter(description = "Identificador de la película", example = "019b76da-ee50-7013-8ab1-0000130dfe9d") @PathVariable("id") UUID id) {
         boolean deleted = this.movieService.delete(id);
         if (!deleted) {
             return ResponseEntity.notFound().build();

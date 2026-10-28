@@ -1,6 +1,7 @@
 package com.afperdomo2.movieverse.domain.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -30,7 +31,7 @@ public class MovieService {
         return this.movieRepository.findPage(page, limit);
     }
 
-    public MovieDto findById(long id) {
+    public MovieDto findById(UUID id) {
         return this.movieRepository.findById(id);
     }
 
@@ -38,15 +39,15 @@ public class MovieService {
         return this.movieRepository.create(movieDto);
     }
 
-    public MovieDto update(long id, UpdateMovieDto changes) {
+    public MovieDto update(UUID id, UpdateMovieDto changes) {
         return this.movieRepository.update(id, changes);
     }
 
-    public MovieDto patch(long id, PatchMovieDto changes) {
+    public MovieDto patch(UUID id, PatchMovieDto changes) {
         return this.movieRepository.patch(id, changes);
     }
 
-    public boolean delete(long id) {
+    public boolean delete(UUID id) {
         return this.movieRepository.delete(id);
     }
 }

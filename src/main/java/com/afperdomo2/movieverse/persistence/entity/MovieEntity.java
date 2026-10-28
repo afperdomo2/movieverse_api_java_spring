@@ -3,6 +3,7 @@ package com.afperdomo2.movieverse.persistence.entity;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.UUID;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
@@ -16,8 +17,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
@@ -34,8 +33,8 @@ import lombok.Setter;
 public class MovieEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(nullable = false, updatable = false)
+    private UUID id;
 
     @Column(nullable = false, unique = true, length = 255)
     private String title;
