@@ -11,8 +11,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
+import com.afperdomo2.movieverse.domain.Genre;
+import com.afperdomo2.movieverse.domain.dto.AuthorDetailDto;
 import com.afperdomo2.movieverse.domain.dto.AuthorDto;
 import com.afperdomo2.movieverse.domain.dto.CreateAuthorDto;
+import com.afperdomo2.movieverse.domain.dto.MovieSummaryDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateAuthorDto;
 import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 
@@ -111,6 +114,22 @@ class AuthorMapperTest {
         assertThat(entity.getBiography()).isEqualTo("Director y guionista.");
         assertThat(entity.getId()).isEqualTo(AUTHOR_ID);
         assertThat(entity.isActive()).isTrue();
+    }
+
+    @Test
+    @DisplayName("toDetailDto mapea el autor y sus películas")
+    void toDetailDto_mapsAuthorAndMovies() {
+        MovieSummaryDto movie = new MovieSummaryDto(
+                UUID.fromString("019b76da-d2f8-700c-8004-00000c08d6b4"),
+                "Interstellar", 169, Genre.SCI_FI, LocalDate.of(2014, 11, 7),
+                true, 8.6, "VERY_GOOD");
+
+        AuthorDetailDto detail = mapper.toDetailDto(authorEntity(), List.of(movie));
+
+        assertThat(detail.id()).isEqualTo(AUTHOR_ID);
+        assertThat(detail.name()).isEqualTo("Christopher");
+        assertThat(detail.lastName()).isEqualTo("Nolan");
+        assertThat(detail.movies()).containsExactly(movie);
     }
 
     private static AuthorEntity authorEntity() {

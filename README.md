@@ -381,6 +381,40 @@ Content-Type: application/json
 }
 ```
 
+**Detalle de un autor**
+
+`GET /authors/{id}` devuelve los datos del autor y su filmografía. Las películas se ordenan por fecha de lanzamiento descendente y luego por título.
+
+```http
+GET /movieverse/api/authors/019b7c01-0bd0-7003-a001-0000030235ad
+```
+
+```json
+{
+  "id": "019b7c01-0bd0-7003-a001-0000030235ad",
+  "name": "Christopher",
+  "lastName": "Nolan",
+  "nationality": "British-American",
+  "birthDate": "1970-07-30",
+  "biography": "Director, guionista y productor.",
+  "isActive": true,
+  "movies": [
+    {
+      "id": "019b76da-d2f8-700c-8004-00000c08d6b4",
+      "title": "Interstellar",
+      "duration": 169,
+      "genre": "Sci-Fi",
+      "releaseDate": "2014-11-07",
+      "isActive": true,
+      "rating": 8.6,
+      "ratingString": "VERY_GOOD"
+    }
+  ]
+}
+```
+
+Si el autor no tiene películas, `movies` devuelve `[]`. El listado paginado `GET /authors` no incluye `movies` para evitar consultas innecesarias.
+
 <a id="configuracion"></a>
 ## 7. ⚙️ Configuración
 

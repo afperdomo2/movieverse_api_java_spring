@@ -13,6 +13,7 @@ import org.mapstruct.Named;
 import com.afperdomo2.movieverse.domain.dto.AuthorSummaryDto;
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.MovieSummaryDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
@@ -31,6 +32,11 @@ public interface MovieMapper {
     MovieDto toDto(MovieEntity entity);
 
     List<MovieDto> toDto(Iterable<MovieEntity> entities);
+
+    @Mapping(source = "rating", target = "ratingString", qualifiedByName = "bigDecimalToRatingString")
+    MovieSummaryDto toSummaryDto(MovieEntity entity);
+
+    List<MovieSummaryDto> toSummaryDto(Iterable<MovieEntity> entities);
 
     @InheritInverseConfiguration
     @Mapping(target = "authors", ignore = true)

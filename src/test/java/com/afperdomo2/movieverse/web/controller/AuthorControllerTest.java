@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.afperdomo2.movieverse.domain.dto.AuthorDetailDto;
 import com.afperdomo2.movieverse.domain.dto.AuthorDto;
 import com.afperdomo2.movieverse.domain.dto.CreateAuthorDto;
 import com.afperdomo2.movieverse.common.pagination.PageQuery;
@@ -72,10 +73,10 @@ class AuthorControllerTest {
     @Test
     @DisplayName("findById devuelve 200 con el autor")
     void findById_returnsOk() {
-        AuthorDto author = authorDto();
+        AuthorDetailDto author = authorDetailDto();
         when(authorService.findById(AUTHOR_ID)).thenReturn(author);
 
-        ResponseEntity<AuthorDto> response = authorController.findById(AUTHOR_ID);
+        ResponseEntity<AuthorDetailDto> response = authorController.findById(AUTHOR_ID);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(author);
@@ -141,6 +142,11 @@ class AuthorControllerTest {
     private static AuthorDto authorDto() {
         return new AuthorDto(AUTHOR_ID, "Christopher", "Nolan", "British-American",
                 LocalDate.of(1970, 7, 30), "Director.", true);
+    }
+
+    private static AuthorDetailDto authorDetailDto() {
+        return new AuthorDetailDto(AUTHOR_ID, "Christopher", "Nolan", "British-American",
+                LocalDate.of(1970, 7, 30), "Director.", true, List.of());
     }
 
     private static CreateAuthorDto createRequest() {

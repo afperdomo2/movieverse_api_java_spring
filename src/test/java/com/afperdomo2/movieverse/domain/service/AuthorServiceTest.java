@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.afperdomo2.movieverse.domain.dto.AuthorDetailDto;
 import com.afperdomo2.movieverse.domain.dto.AuthorDto;
 import com.afperdomo2.movieverse.domain.dto.CreateAuthorDto;
 import com.afperdomo2.movieverse.common.pagination.PageResponse;
@@ -51,7 +52,7 @@ class AuthorServiceTest {
     @Test
     @DisplayName("findById delega en el repositorio")
     void findById_delegatesToRepository() {
-        AuthorDto author = authorDto();
+        AuthorDetailDto author = authorDetailDto();
         when(authorRepository.findById(AUTHOR_ID)).thenReturn(author);
 
         assertThat(authorService.findById(AUTHOR_ID)).isEqualTo(author);
@@ -116,6 +117,11 @@ class AuthorServiceTest {
     private static AuthorDto authorDto() {
         return new AuthorDto(AUTHOR_ID, "Christopher", "Nolan", "British-American",
                 LocalDate.of(1970, 7, 30), "Director.", true);
+    }
+
+    private static AuthorDetailDto authorDetailDto() {
+        return new AuthorDetailDto(AUTHOR_ID, "Christopher", "Nolan", "British-American",
+                LocalDate.of(1970, 7, 30), "Director.", true, List.of());
     }
 
     private static CreateAuthorDto createRequest() {

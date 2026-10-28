@@ -27,9 +27,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import com.afperdomo2.movieverse.domain.Genre;
+import com.afperdomo2.movieverse.domain.dto.AuthorDetailDto;
 import com.afperdomo2.movieverse.domain.dto.AuthorDto;
 import com.afperdomo2.movieverse.domain.dto.CreateAuthorDto;
 import com.afperdomo2.movieverse.common.pagination.PageResponse;
+import com.afperdomo2.movieverse.domain.dto.MovieSummaryDto;
 import com.afperdomo2.movieverse.domain.dto.PatchAuthorDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateAuthorDto;
 import com.afperdomo2.movieverse.domain.exception.AuthorAlreadyExistsException;
@@ -37,7 +40,9 @@ import com.afperdomo2.movieverse.domain.exception.AuthorNotFoundException;
 import com.afperdomo2.movieverse.persistence.crud.CrudAuthorEntity;
 import com.afperdomo2.movieverse.persistence.crud.CrudMovieEntity;
 import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
+import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
 import com.afperdomo2.movieverse.persistence.mapper.AuthorMapper;
+import com.afperdomo2.movieverse.persistence.mapper.MovieMapper;
 
 @ExtendWith(MockitoExtension.class)
 class AuthorEntityRepositoryTest {
@@ -55,6 +60,9 @@ class AuthorEntityRepositoryTest {
 
     @Mock
     private AuthorMapper authorMapper;
+
+    @Mock
+    private MovieMapper movieMapper;
 
     @InjectMocks
     private AuthorEntityRepository repository;
@@ -94,12 +102,30 @@ class AuthorEntityRepositoryTest {
     @DisplayName("findById devuelve el DTO cuando el autor existe")
     void findById_returnsDto_whenEntityExists() {
         AuthorEntity entity = authorEntity(AUTHOR_ID, "Christopher", "Nolan");
-        AuthorDto dto = authorDto(AUTHOR_ID, "Christopher", "Nolan");
+        MovieEntity movie = movieEntity();
+        MovieSummaryDto summary = movieSummaryDto();
+        AuthorDetailDto detail = authorDetailDto(List.of(summary));
         when(crudAuthorEntity.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
-        when(authorMapper.toDto(entity)).thenReturn(dto);
+        when(crudMovieEntity.findByAuthorId(AUTHOR_ID)).thenReturn(List.of(movie));
+        when(movieMapper.toSummaryDto(List.of(movie))).thenReturn(List.of(summary));
+        when(authorMapper.toDetailDto(entity, List.of(summary))).thenReturn(detail);
 
-        assertThat(repository.findById(AUTHOR_ID)).isEqualTo(dto);
+        assertThat(repository.findById(AUTHOR_ID)).isEqualTo(detail);
         verify(crudAuthorEntity).findById(AUTHOR_ID);
+        verify(crudMovieEntity).findByAuthorId(AUTHOR_ID);
+    }
+
+    @Test
+    @DisplayName("findById devuelve movies vacío cuando el autor no tiene películas")
+    void findById_returnsEmptyMovies_whenAuthorHasNoMovies() {
+        AuthorEntity entity = authorEntity(AUTHOR_ID, "Christopher", "Nolan");
+        AuthorDetailDto detail = authorDetailDto(List.of());
+        when(crudAuthorEntity.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
+        when(crudMovieEntity.findByAuthorId(AUTHOR_ID)).thenReturn(List.of());
+        when(movieMapper.toSummaryDto(List.<MovieEntity>of())).thenReturn(List.of());
+        when(authorMapper.toDetailDto(entity, List.of())).thenReturn(detail);
+
+        assertThat(repository.findById(AUTHOR_ID).movies()).isEmpty();
     }
 
     @Test
@@ -110,7 +136,8 @@ class AuthorEntityRepositoryTest {
         assertThatThrownBy(() -> repository.findById(UNKNOWN_AUTHOR_ID))
                 .isInstanceOf(AuthorNotFoundException.class)
                 .hasMessageContaining(UNKNOWN_AUTHOR_ID.toString());
-        verify(authorMapper, never()).toDto(any(AuthorEntity.class));
+        verify(crudMovieEntity, never()).findByAuthorId(UNKNOWN_AUTHOR_ID);
+        verify(authorMapper, never()).toDetailDto(any(AuthorEntity.class), any());
     }
 
     @Test
@@ -308,6 +335,30 @@ class AuthorEntityRepositoryTest {
 
     private static AuthorDto authorDto(UUID id, String name, String lastName) {
         return new AuthorDto(id, name, lastName, "British-American", BIRTH_DATE, "Director.", true);
+    }
+
+    private static AuthorDetailDto authorDetailDto(List<MovieSummaryDto> movies) {
+        return new AuthorDetailDto(AUTHOR_ID, "Christopher", "Nolan", "British-American", BIRTH_DATE,
+                "Director.", true, movies);
+    }
+
+    private static MovieEntity movieEntity() {
+        MovieEntity movie = new MovieEntity();
+        movie.setId(UUID.fromString("019b76da-d2f8-700c-8004-00000c08d6b4"));
+        movie.setTitle("Interstellar");
+        movie.setDuration(169);
+        movie.setGenre(Genre.SCI_FI);
+        movie.setReleaseDate(LocalDate.of(2014, 11, 7));
+        movie.setRating(new java.math.BigDecimal("8.6"));
+        movie.setActive(true);
+        return movie;
+    }
+
+    private static MovieSummaryDto movieSummaryDto() {
+        return new MovieSummaryDto(
+                UUID.fromString("019b76da-d2f8-700c-8004-00000c08d6b4"),
+                "Interstellar", 169, Genre.SCI_FI, LocalDate.of(2014, 11, 7),
+                true, 8.6, "VERY_GOOD");
     }
 
     private static CreateAuthorDto createRequest(String name, String lastName) {

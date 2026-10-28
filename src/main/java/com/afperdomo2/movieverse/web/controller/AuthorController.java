@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.afperdomo2.movieverse.domain.dto.AuthorDetailDto;
 import com.afperdomo2.movieverse.domain.dto.AuthorDto;
 import com.afperdomo2.movieverse.domain.dto.CreateAuthorDto;
 import com.afperdomo2.movieverse.common.pagination.PageQuery;
@@ -57,7 +58,7 @@ public class AuthorController {
             @ApiResponse(responseCode = "400", description = "Identificador inválido", content = @Content()),
             @ApiResponse(responseCode = "404", description = "Autor no encontrado", content = @Content())
     })
-    public ResponseEntity<AuthorDto> findById(
+    public ResponseEntity<AuthorDetailDto> findById(
             @Parameter(description = "Identificador del autor", example = "019b7c01-0bd0-7003-a001-0000030235ad") @PathVariable("id") UUID id) {
         return ResponseEntity.ok(this.authorService.findById(id));
     }

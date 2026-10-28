@@ -90,11 +90,13 @@ src/main/java/com/afperdomo2/movieverse/
 │   ├── Genre.java
 │   ├── RatingString.java
 │   ├── dto/
+│   │   ├── AuthorDetailDto.java
 │   │   ├── AuthorDto.java
 │   │   ├── AuthorSummaryDto.java
 │   │   ├── CreateAuthorDto.java
 │   │   ├── CreateMovieDto.java
 │   │   ├── MovieDto.java
+│   │   ├── MovieSummaryDto.java
 │   │   ├── PatchAuthorDto.java
 │   │   ├── PatchMovieDto.java
 │   │   ├── SuggestionRequestDto.java
@@ -173,16 +175,17 @@ sequenceDiagram
 - Parámetros inválidos devuelven HTTP 400.
 - `MovieService.findAll()` se mantiene sin paginar porque es la herramienta `@Tool` que usa la IA.
 - `GET /authors` reutiliza `PageQuery` y `PageResponse` de `common/pagination`, y ordena por `lastName` y luego por `name`.
+- `GET /authors/{id}` devuelve `AuthorDetailDto` con `movies` (`MovieSummaryDto`), ordenadas por `releaseDate DESC, title ASC`. Usa `CrudMovieEntity.findByAuthorId`; son 2 consultas y no hay N+1.
 
 ## Componentes principales
 
 | Componente | Responsabilidad |
 |---|---|
 | `MovieController` | Expone `/movies`, valida la entrada y traduce a códigos HTTP |
-| `AuthorController` | Expone `/authors` con CRUD paginado |
+| `AuthorController` | Expone `/authors` con CRUD paginado; el detalle incluye la filmografía |
 | `HelloController` | Expone `/hello` para probar la integración con IA |
 | `MovieService` | Orquesta las operaciones de negocio y expone `findAll` como herramienta de IA |
-| `AuthorService` | Orquesta las operaciones de autores |
+| `AuthorService` | Orquesta las operaciones de autores y el detalle con películas |
 | `MovieRepository` | Contrato de persistencia del dominio |
 | `AuthorRepository` | Contrato de persistencia de autores |
 | `MovieEntityRepository` | Implementa el contrato usando `CrudMovieEntity` y MapStruct |
@@ -207,6 +210,8 @@ sequenceDiagram
 | `PatchMovieDto` | Entrada para actualizar parcialmente una película; usa `Optional` |
 | `AuthorDto` | Respuesta completa de un autor |
 | `AuthorSummaryDto` | Resumen de autor incrustado en las respuestas de películas |
+| `AuthorDetailDto` | Detalle de autor con su filmografía (`movies`) |
+| `MovieSummaryDto` | Resumen de película incrustado en el detalle de un autor |
 | `CreateAuthorDto` | Entrada para crear un autor |
 | `UpdateAuthorDto` | Entrada para actualizar nombre, apellido, nacionalidad, nacimiento y biografía |
 | `PatchAuthorDto` | Entrada para actualizar parcialmente un autor; incluye `isActive` |

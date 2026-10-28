@@ -17,6 +17,7 @@ import com.afperdomo2.movieverse.domain.Genre;
 import com.afperdomo2.movieverse.domain.dto.AuthorSummaryDto;
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.MovieSummaryDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
@@ -214,6 +215,20 @@ class MovieMapperTest {
         MovieDto dto = mapper.toDto(movieEntity());
 
         assertThat(dto.authors()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("toSummaryDto mapea los campos básicos y ratingString")
+    void toSummaryDto_mapsFields() {
+        MovieSummaryDto summary = mapper.toSummaryDto(movieEntity());
+
+        assertThat(summary.id()).isEqualTo(MOVIE_ID);
+        assertThat(summary.title()).isEqualTo("Interstellar");
+        assertThat(summary.genre()).isEqualTo(Genre.SCI_FI);
+        assertThat(summary.releaseDate()).isEqualTo(RELEASE_DATE);
+        assertThat(summary.active()).isTrue();
+        assertThat(summary.rating()).isEqualTo(8.6);
+        assertThat(summary.ratingString()).isEqualTo("VERY_GOOD");
     }
 
     private static AuthorEntity authorEntity(String id, String name, String lastName) {

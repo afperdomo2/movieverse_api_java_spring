@@ -1,5 +1,6 @@
 package com.afperdomo2.movieverse.persistence.crud;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,6 +17,15 @@ public interface CrudMovieEntity extends JpaRepository<MovieEntity, UUID> {
 
     @EntityGraph(attributePaths = "authors")
     Optional<MovieEntity> findById(UUID id);
+
+    @Query("""
+            select m
+            from MovieEntity m
+            join m.authors a
+            where a.id = :authorId
+            order by m.releaseDate desc, m.title asc
+            """)
+    List<MovieEntity> findByAuthorId(@Param("authorId") UUID authorId);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "DELETE FROM movie_authors WHERE movie_id = :movieId", nativeQuery = true)

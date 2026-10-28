@@ -10,9 +10,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.afperdomo2.movieverse.domain.dto.AuthorDetailDto;
 import com.afperdomo2.movieverse.domain.dto.AuthorDto;
 import com.afperdomo2.movieverse.domain.dto.CreateAuthorDto;
 import com.afperdomo2.movieverse.common.pagination.PageResponse;
+import com.afperdomo2.movieverse.domain.dto.MovieSummaryDto;
 import com.afperdomo2.movieverse.domain.dto.PatchAuthorDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateAuthorDto;
 import com.afperdomo2.movieverse.domain.exception.AuthorAlreadyExistsException;
@@ -22,6 +24,7 @@ import com.afperdomo2.movieverse.persistence.crud.CrudAuthorEntity;
 import com.afperdomo2.movieverse.persistence.crud.CrudMovieEntity;
 import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 import com.afperdomo2.movieverse.persistence.mapper.AuthorMapper;
+import com.afperdomo2.movieverse.persistence.mapper.MovieMapper;
 import com.afperdomo2.movieverse.common.uuid.UuidV7Generator;
 
 @Repository
@@ -29,12 +32,14 @@ public class AuthorEntityRepository implements AuthorRepository {
     private final CrudAuthorEntity crudAuthorEntity;
     private final CrudMovieEntity crudMovieEntity;
     private final AuthorMapper authorMapper;
+    private final MovieMapper movieMapper;
 
     public AuthorEntityRepository(CrudAuthorEntity crudAuthorEntity, CrudMovieEntity crudMovieEntity,
-            AuthorMapper authorMapper) {
+            AuthorMapper authorMapper, MovieMapper movieMapper) {
         this.crudAuthorEntity = crudAuthorEntity;
         this.crudMovieEntity = crudMovieEntity;
         this.authorMapper = authorMapper;
+        this.movieMapper = movieMapper;
     }
 
     @Override
@@ -54,8 +59,12 @@ public class AuthorEntityRepository implements AuthorRepository {
     }
 
     @Override
-    public AuthorDto findById(UUID id) {
-        return this.authorMapper.toDto(findEntity(id));
+    @Transactional(readOnly = true)
+    public AuthorDetailDto findById(UUID id) {
+        AuthorEntity author = findEntity(id);
+        List<MovieSummaryDto> movies = this.movieMapper.toSummaryDto(
+                this.crudMovieEntity.findByAuthorId(id));
+        return this.authorMapper.toDetailDto(author, movies);
     }
 
     @Override

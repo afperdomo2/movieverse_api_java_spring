@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.afperdomo2.movieverse.domain.dto.AuthorDetailDto;
 import com.afperdomo2.movieverse.domain.dto.AuthorDto;
 import com.afperdomo2.movieverse.domain.dto.CreateAuthorDto;
 import com.afperdomo2.movieverse.common.pagination.PageResponse;
@@ -23,7 +24,7 @@ public class AuthorService {
         return this.authorRepository.findPage(page, limit);
     }
 
-    public AuthorDto findById(UUID id) {
+    public AuthorDetailDto findById(UUID id) {
         return this.authorRepository.findById(id);
     }
 
