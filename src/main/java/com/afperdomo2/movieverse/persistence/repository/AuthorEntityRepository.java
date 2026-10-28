@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.afperdomo2.movieverse.domain.dto.AuthorDto;
 import com.afperdomo2.movieverse.domain.dto.CreateAuthorDto;
-import com.afperdomo2.movieverse.domain.dto.PageResponse;
+import com.afperdomo2.movieverse.common.pagination.PageResponse;
 import com.afperdomo2.movieverse.domain.dto.PatchAuthorDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateAuthorDto;
 import com.afperdomo2.movieverse.domain.exception.AuthorAlreadyExistsException;
@@ -21,7 +21,7 @@ import com.afperdomo2.movieverse.domain.repository.AuthorRepository;
 import com.afperdomo2.movieverse.persistence.crud.CrudAuthorEntity;
 import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 import com.afperdomo2.movieverse.persistence.mapper.AuthorMapper;
-import com.github.f4b6a3.uuid.UuidCreator;
+import com.afperdomo2.movieverse.common.uuid.UuidV7Generator;
 
 @Repository
 public class AuthorEntityRepository implements AuthorRepository {
@@ -61,7 +61,7 @@ public class AuthorEntityRepository implements AuthorRepository {
         }
         AuthorEntity newAuthor = new AuthorEntity();
         this.authorMapper.createEntityFromDto(authorDto, newAuthor);
-        newAuthor.setId(UuidCreator.getTimeOrderedEpoch());
+        newAuthor.setId(UuidV7Generator.generate());
         this.crudAuthorEntity.save(newAuthor);
         return this.authorMapper.toDto(newAuthor);
     }

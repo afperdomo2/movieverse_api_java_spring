@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.afperdomo2.movieverse.domain.dto.AuthorDto;
 import com.afperdomo2.movieverse.domain.dto.CreateAuthorDto;
-import com.afperdomo2.movieverse.domain.dto.PageResponse;
+import com.afperdomo2.movieverse.common.pagination.PageResponse;
 import com.afperdomo2.movieverse.domain.dto.PatchAuthorDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateAuthorDto;
 import com.afperdomo2.movieverse.domain.exception.AuthorNotFoundException;

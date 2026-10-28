@@ -42,19 +42,20 @@ API REST de películas y autores con **Spring Boot 3.5.4** y **Java 21**, CRUD y
 
 - Flujo: `web/controller` → `domain/service` → interfaz `domain/repository` ← `persistence/repository` → `persistence/crud` → `persistence/entity`.
 - `domain/` no debe importar `persistence/` ni `web/`.
-- DTOs en `domain/dto`; mappers MapStruct en `persistence/mapper`.
+- DTOs de entidad en `domain/dto`; paginación compartida en `common/pagination`; utilidades transversales como UUID en `common/uuid`; mappers MapStruct en `persistence/mapper`.
+- `common/` no debe importar `domain/`, `persistence/` ni `web/`.
 - Para añadir un campo u operación CRUD: DTO, interfaz de repositorio (`MovieRepository` o `AuthorRepository`), implementación en `persistence/repository`, mapper correspondiente y controlador (`MovieController` o `AuthorController`).
 - `GET /movies` es paginado (`page` 1-based por defecto 1, `limit` por defecto 10 y máximo 100) y devuelve `PageResponse<MovieDto>`; `MovieService.findAll()` sigue sin paginar para la herramienta de IA.
 - La lógica de persistencia vive en `MovieEntityRepository`: ID inexistente → 404; título duplicado → 409; `create` deja `is_active=true`.
-- Las PK de `movies` y `authors` son **UUID v7** (`java.util.UUID`) generadas en la aplicación con `UuidCreator.getTimeOrderedEpoch()` de `uuid-creator`; no uses `@GeneratedValue` ni `uuidv7()` de PostgreSQL (no existe en PostgreSQL 16).
+- Las PK de `movies` y `authors` son **UUID v7** (`java.util.UUID`) generadas en la aplicación con `UuidV7Generator.generate()` (`common/uuid`), que delega en `uuid-creator`; no uses `@GeneratedValue` ni `uuidv7()` de PostgreSQL (no existe en PostgreSQL 16).
 - `CreateMovieDto` no incluye `id` ni `isActive`: el ID lo genera el repositorio y deja `is_active=true`. El género es el enum `Genre`; valida título ≤ 255 y duración ≤ 600 minutos.
 - `PATCH /movies/{id}` usa `PatchMovieDto` con `Optional`: puede actualizar título, fecha, rating, `genre` e `isActive`; body vacío → 400, título duplicado → 409, género inválido → 400 y la operación es `@Transactional`.
 - `RestExceptionHandler` traduce las excepciones de dominio, `ObjectOptimisticLockingFailureException` → 409 y `MethodArgumentTypeMismatchException` (UUID inválido en la ruta) → 400.
 - **Autores:** `AuthorEntity` se mapea a `authors` con PK `UUID`. `GET /authors` es paginado y ordena por `lastName` y `name`. `name` y `lastName` son obligatorios y su combinación es única → 409. `nationality`, `birthDate` y `biography` son opcionales. `POST` fuerza `is_active=true`; solo `PATCH` permite cambiar `isActive`. No hay relación con `movies` todavía.
 - La lógica de autores vive en `AuthorEntityRepository`; el flujo es `AuthorController` → `AuthorService` → `AuthorRepository` ← `AuthorEntityRepository`.
 - `RatingMapper` calcula `ratingString`; los umbrales están en esa clase.
-- `MovieEntity` usa Lombok (`@Getter`, `@Setter`, `@NoArgsConstructor`; nunca `@Data`) y auditoría con `@CreatedDate`/`@LastModifiedDate` + `@EnableJpaAuditing` en `config/JpaAuditingConfig`.
-- `version` es un `@Version` para bloqueo optimista; las columnas de auditoría usan `NOT NULL DEFAULT now()` para sobrevivir a `ddl-auto=update`.
+- Las entidades extienden `AuditableEntity` (`persistence/entity`), que a su vez extiende `BaseEntity`. `BaseEntity` aporta `id` UUID y `version`; `AuditableEntity` aporta `createdAt`/`updatedAt` con `@CreatedDate`/`@LastModifiedDate`. `@EnableJpaAuditing` vive en `config/JpaAuditingConfig`. Los campos heredados no se redeclaran en las entidades.
+- `version` es un `@Version` para bloqueo optimista y vive en `BaseEntity`; las columnas de auditoría usan `NOT NULL DEFAULT now()` para sobrevivir a `ddl-auto=update`.
 - `data.sql` inserta películas y autores de ejemplo solo si su tabla está vacía, y se ejecuta en cada arranque de `dev`. Los seeds usan UUID v7 literales con cast `::uuid`.
 
 Detalle completo en [ARCHITECTURE.md](ARCHITECTURE.md).

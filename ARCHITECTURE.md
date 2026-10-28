@@ -36,23 +36,36 @@ flowchart TB
     CRUD[CrudMovieEntity / CrudAuthorEntity]
     MAP[MovieMapper / AuthorMapper / RatingMapper]
     ENT[MovieEntity / AuthorEntity]
+    BASE[BaseEntity / AuditableEntity]
+  end
+
+  subgraph Common["Capa común"]
+    PAG[PageQuery / PageResponse]
+    UUIDG[UuidV7Generator]
   end
 
   DB[(PostgreSQL)]
 
   MC --> MS
   MC --> AI
+  MC --> PAG
   AC --> AS
+  AC --> PAG
   HC --> AI
   MS --> MR
   AS --> AR
+  MS --> PAG
+  AS --> PAG
   MR -. implementada por .-> PER
   AR -. implementada por .-> AER
   PER --> CRUD
   AER --> CRUD
   PER --> MAP
   AER --> MAP
+  PER --> UUIDG
+  AER --> UUIDG
   CRUD --> ENT
+  ENT -. hereda .-> BASE
   ENT --> DB
   MS --> DTO
   AS --> DTO
@@ -64,8 +77,15 @@ flowchart TB
 ```text
 src/main/java/com/afperdomo2/movieverse/
 ├── MovieverseApplication.java
+├── common/
+│   ├── pagination/
+│   │   ├── PageQuery.java
+│   │   └── PageResponse.java
+│   └── uuid/
+│       └── UuidV7Generator.java
 ├── config/
-│   └── AiHttpConfig.java
+│   ├── AiHttpConfig.java
+│   └── JpaAuditingConfig.java
 ├── domain/
 │   ├── Genre.java
 │   ├── RatingString.java
@@ -74,8 +94,6 @@ src/main/java/com/afperdomo2/movieverse/
 │   │   ├── CreateAuthorDto.java
 │   │   ├── CreateMovieDto.java
 │   │   ├── MovieDto.java
-│   │   ├── PageQuery.java
-│   │   ├── PageResponse.java
 │   │   ├── PatchAuthorDto.java
 │   │   ├── PatchMovieDto.java
 │   │   ├── SuggestionRequestDto.java
@@ -99,7 +117,9 @@ src/main/java/com/afperdomo2/movieverse/
 │   │   ├── CrudAuthorEntity.java
 │   │   └── CrudMovieEntity.java
 │   ├── entity/
+│   │   ├── AuditableEntity.java
 │   │   ├── AuthorEntity.java
+│   │   ├── BaseEntity.java
 │   │   └── MovieEntity.java
 │   ├── mapper/
 │   │   ├── AuthorMapper.java
@@ -143,16 +163,16 @@ sequenceDiagram
 
 ### Identificadores UUID v7
 
-`MovieEntity` y `AuthorEntity` usan `UUID` como PK. El valor se genera en la aplicación con `UuidCreator.getTimeOrderedEpoch()` (`uuid-creator`) al crear el registro. No se usa `@GeneratedValue` ni una función de PostgreSQL: el tipo `uuid` existe en PostgreSQL 16, pero `uuidv7()` solo está disponible de forma nativa desde PostgreSQL 18.
+`MovieEntity` y `AuthorEntity` usan `UUID` como PK. El valor se genera en la aplicación con `UuidV7Generator.generate()` (`common/uuid`), que delega en `UuidCreator.getTimeOrderedEpoch()` de `uuid-creator`. No se usa `@GeneratedValue` ni una función de PostgreSQL: el tipo `uuid` existe en PostgreSQL 16, pero `uuidv7()` solo está disponible de forma nativa desde PostgreSQL 18.
 
 ### Paginación del listado
 
-`GET /movies?page=1&limit=10` usa `PageQuery` (page 1-based, limit entre 1 y 100) y llama a `MovieService.findPage`, que delega en `MovieEntityRepository.findPage`. Este construye `PageRequest.of(page - 1, limit, Sort.by("id").ascending())` y devuelve un `PageResponse<MovieDto>` con `items`, `totalElements`, `totalPages`, `hasNext` y `hasPrevious`.
+`GET /movies?page=1&limit=10` usa `PageQuery` (page 1-based, limit entre 1 y 100) desde `common/pagination` y llama a `MovieService.findPage`, que delega en `MovieEntityRepository.findPage`. Este construye `PageRequest.of(page - 1, limit, Sort.by("id").ascending())` y devuelve un `PageResponse<MovieDto>` con `items`, `totalElements`, `totalPages`, `hasNext` y `hasPrevious`.
 
 - Una página fuera de rango devuelve `items` vacío con HTTP 200.
 - Parámetros inválidos devuelven HTTP 400.
 - `MovieService.findAll()` se mantiene sin paginar porque es la herramienta `@Tool` que usa la IA.
-- `GET /authors` reutiliza `PageQuery` y `PageResponse`, y ordena por `lastName` y luego por `name`.
+- `GET /authors` reutiliza `PageQuery` y `PageResponse` de `common/pagination`, y ordena por `lastName` y luego por `name`.
 
 ## Componentes principales
 
@@ -168,8 +188,11 @@ sequenceDiagram
 | `MovieEntityRepository` | Implementa el contrato usando `CrudMovieEntity` y MapStruct |
 | `AuthorEntityRepository` | Implementa el CRUD de autores con `CrudAuthorEntity` y MapStruct |
 | `CrudMovieEntity` / `CrudAuthorEntity` | Repositorios Spring Data (`JpaRepository`) |
+| `BaseEntity` | `@MappedSuperclass` con `id` UUID y `version` para bloqueo optimista |
+| `AuditableEntity` | `@MappedSuperclass` que hereda de `BaseEntity` y añade `createdAt`/`updatedAt` |
 | `MovieMapper` / `AuthorMapper` | Convierten entre entidades y DTOs |
 | `RatingMapper` | Calcula `ratingString` a partir del rating numérico |
+| `UuidV7Generator` | Genera UUID v7 para las PK de `movies` y `authors` |
 | `RestExceptionHandler` | Traduce excepciones de dominio a respuestas HTTP |
 | `MovieverseAiService` | Clase `@Service` que encapsula un `ChatClient` de Spring AI |
 | `AiHttpConfig` | Añade `x-opencode-session` y user agent cuando el base-url es de OpenCode Go |
@@ -186,8 +209,8 @@ sequenceDiagram
 | `CreateAuthorDto` | Entrada para crear un autor |
 | `UpdateAuthorDto` | Entrada para actualizar nombre, apellido, nacionalidad, nacimiento y biografía |
 | `PatchAuthorDto` | Entrada para actualizar parcialmente un autor; incluye `isActive` |
-| `PageQuery` | Parámetros de paginación `page` (1-based) y `limit` (máximo 100) |
-| `PageResponse<T>` | Respuesta paginada con `items`, página actual y metadatos |
+| `PageQuery` | Parámetros de paginación `page` (1-based) y `limit` (máximo 100); vive en `common/pagination` |
+| `PageResponse<T>` | Respuesta paginada con `items`, página actual y metadatos; vive en `common/pagination` |
 | `SuggestionRequestDto` | Preferencias del usuario para generar sugerencias |
 
 ### Validaciones de creación
@@ -238,10 +261,11 @@ La entidad `MovieEntity` se mapea a la tabla `movies`:
 
 Reglas relevantes:
 
-- La auditoría usa Spring Data JPA (`@CreatedDate`/`@LastModifiedDate` + `@EnableJpaAuditing`). Las columnas son `NOT NULL DEFAULT now()` para que `ddl-auto=update` pueda añadirlas sobre tablas con datos.
-- `version` implementa bloqueo optimista: Hibernate lo incrementa en cada actualización y lanza `OptimisticLockException` si hay conflicto.
+- La auditoría usa Spring Data JPA (`@CreatedDate`/`@LastModifiedDate` + `@EnableJpaAuditing`) y se define una sola vez en `AuditableEntity`. Las columnas son `NOT NULL DEFAULT now()` para que `ddl-auto=update` pueda añadirlas sobre tablas con datos.
+- `version` implementa bloqueo optimista, vive en `BaseEntity` y Hibernate lo incrementa en cada actualización; lanza `OptimisticLockException` si hay conflicto.
+- `MovieEntity` y `AuthorEntity` extienden `AuditableEntity`, que extiende `BaseEntity`. No redeclaran `id`, `version`, `createdAt` ni `updatedAt`.
 - La entidad usa Lombok (`@Getter`, `@Setter`, `@NoArgsConstructor`); no se usa `@Data` para evitar `equals`/`hashCode`/`toString` inadecuados en JPA.
-- `create` deja `is_active = true` y genera el ID con `UuidCreator.getTimeOrderedEpoch()`.
+- `create` deja `is_active = true` y genera el ID con `UuidV7Generator.generate()`.
 - `CreateMovieDto` no acepta `id` ni `isActive`; el género es el enum `Genre`. Valida título ≤ 255 y duración ≤ 600 minutos.
 - `update` (PUT) actualiza título, fecha y rating; `releaseDate` es obligatoria y `rating` sigue siendo opcional. No cambia `genre` ni `isActive`.
 - `patch` (PATCH) puede actualizar título, fecha, rating, `genre` e `isActive`. Un body vacío devuelve 400; un título duplicado devuelve 409; la operación es `@Transactional`.

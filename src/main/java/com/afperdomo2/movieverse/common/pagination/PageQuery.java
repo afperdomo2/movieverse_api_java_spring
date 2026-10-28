@@ -1,4 +1,4 @@
-package com.afperdomo2.movieverse.domain.dto;
+package com.afperdomo2.movieverse.common.pagination;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;

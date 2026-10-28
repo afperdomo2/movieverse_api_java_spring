@@ -1,4 +1,4 @@
-package com.afperdomo2.movieverse.domain.dto;
+package com.afperdomo2.movieverse.common.pagination;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
