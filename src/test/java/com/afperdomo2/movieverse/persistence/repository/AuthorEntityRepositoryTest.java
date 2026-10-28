@@ -35,6 +35,7 @@ import com.afperdomo2.movieverse.domain.dto.UpdateAuthorDto;
 import com.afperdomo2.movieverse.domain.exception.AuthorAlreadyExistsException;
 import com.afperdomo2.movieverse.domain.exception.AuthorNotFoundException;
 import com.afperdomo2.movieverse.persistence.crud.CrudAuthorEntity;
+import com.afperdomo2.movieverse.persistence.crud.CrudMovieEntity;
 import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 import com.afperdomo2.movieverse.persistence.mapper.AuthorMapper;
 
@@ -48,6 +49,9 @@ class AuthorEntityRepositoryTest {
 
     @Mock
     private CrudAuthorEntity crudAuthorEntity;
+
+    @Mock
+    private CrudMovieEntity crudMovieEntity;
 
     @Mock
     private AuthorMapper authorMapper;
@@ -274,6 +278,7 @@ class AuthorEntityRepositoryTest {
         when(crudAuthorEntity.existsById(AUTHOR_ID)).thenReturn(true);
 
         assertThat(repository.delete(AUTHOR_ID)).isTrue();
+        verify(crudMovieEntity).deleteRelationsByAuthorId(AUTHOR_ID);
         verify(crudAuthorEntity).deleteById(AUTHOR_ID);
     }
 
@@ -285,6 +290,7 @@ class AuthorEntityRepositoryTest {
         assertThatThrownBy(() -> repository.delete(UNKNOWN_AUTHOR_ID))
                 .isInstanceOf(AuthorNotFoundException.class)
                 .hasMessageContaining(UNKNOWN_AUTHOR_ID.toString());
+        verify(crudMovieEntity, never()).deleteRelationsByAuthorId(UNKNOWN_AUTHOR_ID);
         verify(crudAuthorEntity, never()).deleteById(UNKNOWN_AUTHOR_ID);
     }
 

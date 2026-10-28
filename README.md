@@ -42,7 +42,7 @@ Movieverse API expone un catálogo de películas y autores, y permite crear, con
 **✨ Características principales**
 
 - CRUD completo de películas.
-- CRUD completo de autores, sin relación con películas por ahora.
+- CRUD completo de autores y relación muchos-a-muchos con películas.
 - Identificadores UUID v7 (ordenables por fecha) generados en la aplicación.
 - Validación de entrada con Bean Validation.
 - Persistencia en PostgreSQL con Spring Data JPA.
@@ -268,7 +268,7 @@ GET /movieverse/api/movies?page=1&limit=10
   "items": [ ... ],
   "page": 1,
   "limit": 10,
-  "totalElements": 19,
+  "totalElements": 69,
   "totalPages": 2,
   "hasNext": true,
   "hasPrevious": false
@@ -290,9 +290,51 @@ Content-Type: application/json
 
 > El PATCH solo modifica los campos enviados. Un body vacío devuelve `400`; los campos omitidos o enviados como `null` se dejan como están.
 
+**Películas y autores**
+
+La relación se gestiona desde la película mediante `authorIds`. Un autor puede participar en varias películas y una película puede tener varios autores.
+
+```http
+POST /movieverse/api/movies
+Content-Type: application/json
+
+{
+  "title": "Interstellar",
+  "duration": 169,
+  "genre": "Sci-Fi",
+  "releaseDate": "2014-11-07",
+  "rating": 8.6,
+  "authorIds": ["019b7c01-0bd0-7003-a001-0000030235ad"]
+}
+```
+
+La respuesta incluye un resumen de los autores:
+
+```json
+{
+  "id": "019b76da-d2f8-700c-8004-00000c08d6b4",
+  "title": "Interstellar",
+  "authors": [
+    {
+      "id": "019b7c01-0bd0-7003-a001-0000030235ad",
+      "name": "Christopher",
+      "lastName": "Nolan"
+    }
+  ]
+}
+```
+
+Semántica:
+- `POST`: `authorIds` es opcional; si se omite, la película se crea sin autores.
+- `PUT`: `authorIds` es obligatorio; la lista enviada reemplaza la relación y `[]` deja la película sin autores.
+- `PATCH`: si `authorIds` se omite o se envía `null`, no se modifica; `[]` elimina todos los autores.
+- Un autor inexistente devuelve `404`.
+- Al borrar una película se eliminan sus relaciones, pero los autores siguen existiendo.
+- Al borrar un autor se eliminan sus relaciones con las películas, pero las películas siguen existiendo.
+
 **Autores**
 
-El CRUD de autores es independiente de las películas. `GET /authors` está paginado y ordena por apellido y nombre.
+El CRUD de autores se expone en `/authors`. `GET /authors` está paginado y ordena por apellido y nombre.
 
 ```http
 POST /movieverse/api/authors

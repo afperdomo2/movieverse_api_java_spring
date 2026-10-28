@@ -156,6 +156,16 @@ class CreateMovieDtoValidationTest {
         assertThat(validator.validate(copyWithRating(validDto(), rating))).isEmpty();
     }
 
+    @Test
+    @DisplayName("Los authorIds nulos se normalizan a una lista vacía")
+    void nullAuthorIds_areNormalizedToEmpty() {
+        CreateMovieDto dto = new CreateMovieDto("Interstellar", 169, Genre.DRAMA,
+                LocalDate.of(2014, 11, 7), 8.6, null);
+
+        assertThat(dto.authorIds()).isEmpty();
+        assertThat(validator.validate(dto)).isEmpty();
+    }
+
     private static CreateMovieDto validDto() {
         return new CreateMovieDto("Interstellar", 169, Genre.DRAMA, LocalDate.of(2014, 11, 7), 8.6);
     }

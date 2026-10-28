@@ -194,6 +194,6 @@ class MovieControllerTest {
     }
 
     private static MovieDto movieDto(UUID id, String title) {
-        return new MovieDto(id, title, 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD");
+        return new MovieDto(id, title, 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD", List.of());
     }
 }

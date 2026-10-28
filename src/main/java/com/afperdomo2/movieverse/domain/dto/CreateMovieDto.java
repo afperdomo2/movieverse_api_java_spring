@@ -1,6 +1,8 @@
 package com.afperdomo2.movieverse.domain.dto;
 
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.UUID;
 
 import com.afperdomo2.movieverse.domain.Genre;
 
@@ -38,5 +40,16 @@ public record CreateMovieDto(
         @NotNull(message = "La calificación es obligatoria")
         @Min(value = 0, message = "La calificación debe ser mayor o igual a 0")
         @Max(value = 9, message = "La calificación debe ser menor o igual a 9")
-        Double rating) {
+        Double rating,
+
+        @Schema(description = "IDs de los autores. Si se omite, la película se crea sin autores.", example = "[\"019b7c01-0bd0-7003-a001-0000030235ad\"]")
+        Set<@NotNull(message = "El ID del autor no puede ser nulo") UUID> authorIds) {
+
+    public CreateMovieDto {
+        authorIds = authorIds == null ? Set.of() : Set.copyOf(authorIds);
+    }
+
+    public CreateMovieDto(String title, Integer duration, Genre genre, LocalDate releaseDate, Double rating) {
+        this(title, duration, genre, releaseDate, rating, Set.of());
+    }
 }

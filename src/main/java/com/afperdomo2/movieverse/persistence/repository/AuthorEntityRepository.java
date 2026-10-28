@@ -19,6 +19,7 @@ import com.afperdomo2.movieverse.domain.exception.AuthorAlreadyExistsException;
 import com.afperdomo2.movieverse.domain.exception.AuthorNotFoundException;
 import com.afperdomo2.movieverse.domain.repository.AuthorRepository;
 import com.afperdomo2.movieverse.persistence.crud.CrudAuthorEntity;
+import com.afperdomo2.movieverse.persistence.crud.CrudMovieEntity;
 import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 import com.afperdomo2.movieverse.persistence.mapper.AuthorMapper;
 import com.afperdomo2.movieverse.common.uuid.UuidV7Generator;
@@ -26,10 +27,13 @@ import com.afperdomo2.movieverse.common.uuid.UuidV7Generator;
 @Repository
 public class AuthorEntityRepository implements AuthorRepository {
     private final CrudAuthorEntity crudAuthorEntity;
+    private final CrudMovieEntity crudMovieEntity;
     private final AuthorMapper authorMapper;
 
-    public AuthorEntityRepository(CrudAuthorEntity crudAuthorEntity, AuthorMapper authorMapper) {
+    public AuthorEntityRepository(CrudAuthorEntity crudAuthorEntity, CrudMovieEntity crudMovieEntity,
+            AuthorMapper authorMapper) {
         this.crudAuthorEntity = crudAuthorEntity;
+        this.crudMovieEntity = crudMovieEntity;
         this.authorMapper = authorMapper;
     }
 
@@ -106,10 +110,12 @@ public class AuthorEntityRepository implements AuthorRepository {
     }
 
     @Override
+    @Transactional
     public boolean delete(UUID id) {
         if (!this.crudAuthorEntity.existsById(id)) {
             throw new AuthorNotFoundException(id);
         }
+        this.crudMovieEntity.deleteRelationsByAuthorId(id);
         this.crudAuthorEntity.deleteById(id);
         return true;
     }

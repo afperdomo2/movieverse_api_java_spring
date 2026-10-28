@@ -1,6 +1,7 @@
 package com.afperdomo2.movieverse.domain.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 import com.afperdomo2.movieverse.domain.Genre;
@@ -14,5 +15,6 @@ public record MovieDto(
         LocalDate releaseDate,
         @JsonProperty("isActive") boolean active,
         Double rating,
-        String ratingString) {
+        String ratingString,
+        List<AuthorSummaryDto> authors) {
 }

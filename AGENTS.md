@@ -51,7 +51,11 @@ API REST de películas y autores con **Spring Boot 3.5.4** y **Java 21**, CRUD y
 - `CreateMovieDto` no incluye `id` ni `isActive`: el ID lo genera el repositorio y deja `is_active=true`. El género es el enum `Genre`; valida título ≤ 255 y duración ≤ 600 minutos.
 - `PATCH /movies/{id}` usa `PatchMovieDto` con `Optional`: puede actualizar título, fecha, rating, `genre` e `isActive`; body vacío → 400, título duplicado → 409, género inválido → 400 y la operación es `@Transactional`.
 - `RestExceptionHandler` traduce las excepciones de dominio, `ObjectOptimisticLockingFailureException` → 409 y `MethodArgumentTypeMismatchException` (UUID inválido en la ruta) → 400.
-- **Autores:** `AuthorEntity` se mapea a `authors` con PK `UUID`. `GET /authors` es paginado y ordena por `lastName` y `name`. `name` y `lastName` son obligatorios y su combinación es única → 409. `nationality`, `birthDate` y `biography` son opcionales. `POST` fuerza `is_active=true`; solo `PATCH` permite cambiar `isActive`. No hay relación con `movies` todavía.
+- **Autores:** `AuthorEntity` se mapea a `authors` con PK `UUID`. `GET /authors` es paginado y ordena por `lastName` y `name`. `name` y `lastName` son obligatorios y su combinación es única → 409. `nationality`, `birthDate` y `biography` son opcionales. `POST` fuerza `is_active=true`; solo `PATCH` permite cambiar `isActive`.
+- **Relación películas-autores:** `@ManyToMany` unidireccional desde `MovieEntity.authors`, con tabla `movie_authors` (PK compuesta `movie_id, author_id`), `FetchType.LAZY`, `@BatchSize(50)` y `@OrderBy("lastName ASC, name ASC")`. La respuesta usa `AuthorSummaryDto`; no se exponen entidades.
+- `CreateMovieDto` acepta `authorIds` opcional; `UpdateMovieDto` lo exige (lista vacía permitida); `PatchMovieDto` lo acepta como `Optional` (ausente = sin cambios, `[]` = limpiar). Un autor inexistente → 404.
+- `DELETE /authors/{id}` elimina primero las filas de `movie_authors` y luego el autor; las películas permanecen. `DELETE /movies/{id}` elimina sus relaciones y luego la película; los autores permanecen.
+- Las lecturas de películas usan `@Transactional(readOnly = true)` y las escrituras `@Transactional`. `spring.jpa.open-in-view=false`; no dependas de lazy loading fuera de una transacción.
 - La lógica de autores vive en `AuthorEntityRepository`; el flujo es `AuthorController` → `AuthorService` → `AuthorRepository` ← `AuthorEntityRepository`.
 - `RatingMapper` calcula `ratingString`; los umbrales están en esa clase.
 - Todas las entidades extienden `BaseEntity` (`persistence/entity`), un `@MappedSuperclass` que aporta `id` UUID, `version` y `createdAt`/`updatedAt` con `@CreatedDate`/`@LastModifiedDate`. `@EnableJpaAuditing` vive en `config/JpaAuditingConfig`. Los campos heredados no se redeclaran en las entidades.
@@ -74,4 +78,4 @@ Detalle completo en [ARCHITECTURE.md](ARCHITECTURE.md).
 - No ejecutes el perfil `prod` en local sin revisar la configuración de base de datos externa.
 - No agregues secretos a archivos versionados; usa `SPRING_DATASOURCE_*` y `OPENAI_API_KEY`.
 - El contenedor Docker usa el perfil `prod` y escucha en `8080`; el desarrollo local usa `8082`.
-- Si cambias el tipo de una PK existente (por ejemplo `BIGINT` → `UUID`), `ddl-auto=update` no la convierte: respalda y elimina las tablas para que Hibernate las recree.
+- Si cambias el tipo de una PK o la estructura de la relación, respalda y elimina las tablas en orden: `movie_authors`, `movies` y `authors`; `ddl-auto=update` no convierte tipos existentes.

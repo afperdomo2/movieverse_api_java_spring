@@ -91,6 +91,7 @@ src/main/java/com/afperdomo2/movieverse/
 │   ├── RatingString.java
 │   ├── dto/
 │   │   ├── AuthorDto.java
+│   │   ├── AuthorSummaryDto.java
 │   │   ├── CreateAuthorDto.java
 │   │   ├── CreateMovieDto.java
 │   │   ├── MovieDto.java
@@ -186,6 +187,7 @@ sequenceDiagram
 | `AuthorRepository` | Contrato de persistencia de autores |
 | `MovieEntityRepository` | Implementa el contrato usando `CrudMovieEntity` y MapStruct |
 | `AuthorEntityRepository` | Implementa el CRUD de autores con `CrudAuthorEntity` y MapStruct |
+| `MovieEntity.authors` | Relación `@ManyToMany` LAZY con `@BatchSize(50)` y tabla `movie_authors` |
 | `CrudMovieEntity` / `CrudAuthorEntity` | Repositorios Spring Data (`JpaRepository`) |
 | `BaseEntity` | `@MappedSuperclass` con `id` UUID, `version`, `createdAt` y `updatedAt`; base común de las entidades |
 | `MovieMapper` / `AuthorMapper` | Convierten entre entidades y DTOs |
@@ -204,6 +206,7 @@ sequenceDiagram
 | `UpdateMovieDto` | Entrada para actualizar título, fecha y rating |
 | `PatchMovieDto` | Entrada para actualizar parcialmente una película; usa `Optional` |
 | `AuthorDto` | Respuesta completa de un autor |
+| `AuthorSummaryDto` | Resumen de autor incrustado en las respuestas de películas |
 | `CreateAuthorDto` | Entrada para crear un autor |
 | `UpdateAuthorDto` | Entrada para actualizar nombre, apellido, nacionalidad, nacimiento y biografía |
 | `PatchAuthorDto` | Entrada para actualizar parcialmente un autor; incluye `isActive` |
@@ -292,8 +295,28 @@ Reglas de autores:
 - `AuthorEntityRepository` valida duplicados de `name + lastName` en `create`, `update` y `patch` → `AuthorAlreadyExistsException` → 409.
 - Un ID inexistente lanza `AuthorNotFoundException` → 404.
 - `POST` fuerza `is_active = true`; `PUT` no cambia `isActive`; `PATCH` sí puede cambiarlo.
-- `DELETE` es un borrado físico.
-- No existe relación entre `authors` y `movies` en esta versión.
+- `DELETE` es un borrado físico. Primero elimina sus filas de `movie_authors` y después el autor; las películas permanecen.
+
+### Relación `movie_authors`
+
+`MovieEntity` es el lado dueño de una relación `@ManyToMany` con `AuthorEntity`:
+
+```text
+movies 1 ─── N movie_authors N ─── 1 authors
+```
+
+| Columna | Tipo | Observación |
+|---|---|---|
+| `movie_id` | `UUID` | FK a `movies.id` |
+| `author_id` | `UUID` | FK a `authors.id` |
+
+- PK compuesta `(movie_id, author_id)`.
+- La colección es `LAZY` y usa `@BatchSize(50)` para evitar N+1 en la paginación.
+- `@OrderBy("lastName ASC, name ASC")` ordena los autores.
+- `MovieDto.authors` expone `AuthorSummaryDto`, no entidades.
+- `DELETE /movies/{id}` elimina primero las filas de `movie_authors` y luego la película.
+- `DELETE /authors/{id}` elimina primero sus filas de `movie_authors` y luego el autor.
+- `spring.jpa.open-in-view=false`; el mapeo a DTO ocurre dentro de métodos transaccionales.
 
 MapStruct genera las implementaciones al compilar. Si se cambia un mapper y el comportamiento no se actualiza, ejecuta `clean` antes de recompilar.
 
@@ -353,7 +376,6 @@ Para una entidad nueva, replica el bloque completo: `domain/dto`, excepción de 
 
 ## Limitaciones conocidas
 
-- No hay relación entre autores y películas; se añadirá en una fase posterior.
 - No hay Flyway/Liquibase: el esquema se actualiza con `ddl-auto=update`. Cambiar el tipo de una PK existente requiere borrar y recrear la tabla.
 - PostgreSQL 16 no tiene `uuidv7()` nativo; el UUID v7 se genera en la aplicación con `uuid-creator`.
 - El perfil `prod` tiene configuración sensible embebida; debería migrarse a variables de entorno.

@@ -2,7 +2,10 @@ package com.afperdomo2.movieverse.persistence.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.ColumnDefault;
 
 import com.afperdomo2.movieverse.domain.Genre;
@@ -11,7 +14,13 @@ import com.afperdomo2.movieverse.persistence.converter.GenreConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,4 +51,14 @@ public class MovieEntity extends BaseEntity {
     @Column(name = "is_active", nullable = false)
     @ColumnDefault("true")
     private boolean active = true;
+
+    @BatchSize(size = 50)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "movie_authors",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "author_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = { "movie_id", "author_id" }))
+    @OrderBy("lastName ASC, name ASC")
+    private Set<AuthorEntity> authors = new HashSet<>();
 }

@@ -111,6 +111,15 @@ class UpdateMovieDtoValidationTest {
                 .isEmpty();
     }
 
+    @Test
+    @DisplayName("La lista de autores nula es inválida")
+    void nullAuthorIds_isRejected() {
+        UpdateMovieDto dto = new UpdateMovieDto("Interstellar", LocalDate.of(2014, 11, 7), 8.6, null);
+
+        assertThat(messages(validator.validate(dto)))
+                .containsExactly("La lista de autores es obligatoria");
+    }
+
     private static UpdateMovieDto validDto() {
         return new UpdateMovieDto("Interstellar", LocalDate.of(2014, 11, 7), 8.6);
     }

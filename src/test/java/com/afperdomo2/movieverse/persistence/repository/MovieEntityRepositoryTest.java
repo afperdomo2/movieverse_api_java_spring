@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -36,7 +37,10 @@ import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.exception.MovieAlreadyExistsException;
 import com.afperdomo2.movieverse.domain.exception.MovieNotFoundException;
+import com.afperdomo2.movieverse.domain.exception.AuthorNotFoundException;
+import com.afperdomo2.movieverse.persistence.crud.CrudAuthorEntity;
 import com.afperdomo2.movieverse.persistence.crud.CrudMovieEntity;
+import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
 import com.afperdomo2.movieverse.persistence.mapper.MovieMapper;
 
@@ -47,9 +51,14 @@ class MovieEntityRepositoryTest {
     private static final UUID MOVIE_ID = UUID.fromString("019b76da-d2f8-700c-8004-00000c08d6b4");
     private static final UUID OTHER_MOVIE_ID = UUID.fromString("019b76da-bb88-7006-8002-000006046b5a");
     private static final UUID UNKNOWN_MOVIE_ID = UUID.fromString("019b76da-ee50-7013-8ab1-0000130dfe9d");
+    private static final UUID AUTHOR_ID = UUID.fromString("019b7c01-0bd0-7003-a001-0000030235ad");
+    private static final UUID UNKNOWN_AUTHOR_ID = UUID.fromString("019b7c01-4a50-7013-8ab1-0000130dfe9d");
 
     @Mock
     private CrudMovieEntity crudMovieEntity;
+
+    @Mock
+    private CrudAuthorEntity crudAuthorEntity;
 
     @Mock
     private MovieMapper movieMapper;
@@ -406,6 +415,7 @@ class MovieEntityRepositoryTest {
         when(crudMovieEntity.existsById(MOVIE_ID)).thenReturn(true);
 
         assertThat(repository.delete(MOVIE_ID)).isTrue();
+        verify(crudMovieEntity).deleteRelationsByMovieId(MOVIE_ID);
         verify(crudMovieEntity).deleteById(MOVIE_ID);
     }
 
@@ -417,7 +427,95 @@ class MovieEntityRepositoryTest {
         assertThatThrownBy(() -> repository.delete(UNKNOWN_MOVIE_ID))
                 .isInstanceOf(MovieNotFoundException.class)
                 .hasMessageContaining(UNKNOWN_MOVIE_ID.toString());
+        verify(crudMovieEntity, never()).deleteRelationsByMovieId(UNKNOWN_MOVIE_ID);
         verify(crudMovieEntity, never()).deleteById(UNKNOWN_MOVIE_ID);
+    }
+
+    @Test
+    @DisplayName("create resuelve y guarda los autores indicados")
+    void create_resolvesAuthors() {
+        CreateMovieDto request = new CreateMovieDto("Interstellar", 169, Genre.SCI_FI, RELEASE_DATE, 8.6,
+                Set.of(AUTHOR_ID));
+        AuthorEntity author = authorEntity(AUTHOR_ID);
+        doAnswer(invocation -> {
+            MovieEntity entity = invocation.getArgument(1);
+            entity.setTitle(request.title());
+            entity.setDuration(request.duration());
+            entity.setGenre(request.genre());
+            entity.setReleaseDate(request.releaseDate());
+            entity.setRating(BigDecimal.valueOf(request.rating()));
+            return null;
+        }).when(movieMapper).createEntityFromDto(eq(request), any(MovieEntity.class));
+        when(crudAuthorEntity.findAllById(Set.of(AUTHOR_ID))).thenReturn(List.of(author));
+        when(movieMapper.toDto(any(MovieEntity.class))).thenReturn(movieDto(MOVIE_ID, "Interstellar"));
+
+        repository.create(request);
+
+        verify(crudMovieEntity).save(entityCaptor.capture());
+        assertThat(entityCaptor.getValue().getAuthors()).containsExactly(author);
+    }
+
+    @Test
+    @DisplayName("create lanza AuthorNotFoundException cuando un autor no existe")
+    void create_throwsAuthorNotFound_whenAuthorDoesNotExist() {
+        CreateMovieDto request = new CreateMovieDto("Interstellar", 169, Genre.SCI_FI, RELEASE_DATE, 8.6,
+                Set.of(UNKNOWN_AUTHOR_ID));
+        when(crudAuthorEntity.findAllById(Set.of(UNKNOWN_AUTHOR_ID))).thenReturn(List.of());
+
+        assertThatThrownBy(() -> repository.create(request))
+                .isInstanceOf(AuthorNotFoundException.class)
+                .hasMessageContaining(UNKNOWN_AUTHOR_ID.toString());
+        verify(crudMovieEntity, never()).save(any(MovieEntity.class));
+    }
+
+    @Test
+    @DisplayName("update reemplaza los autores de la película")
+    void update_replacesAuthors() {
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
+        AuthorEntity author = authorEntity(AUTHOR_ID);
+        UpdateMovieDto changes = new UpdateMovieDto("Interstellar", RELEASE_DATE, 9.0, Set.of(AUTHOR_ID));
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
+        when(crudAuthorEntity.findAllById(Set.of(AUTHOR_ID))).thenReturn(List.of(author));
+        when(movieMapper.toDto(entity)).thenReturn(movieDto(MOVIE_ID, "Interstellar"));
+
+        repository.update(MOVIE_ID, changes);
+
+        assertThat(entity.getAuthors()).containsExactly(author);
+        verify(crudMovieEntity).save(entity);
+    }
+
+    @Test
+    @DisplayName("patch reemplaza los autores cuando se envía authorIds")
+    void patch_replacesAuthors() {
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
+        AuthorEntity author = authorEntity(AUTHOR_ID);
+        PatchMovieDto changes = new PatchMovieDto(Optional.empty(), Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.empty(), Optional.of(Set.of(AUTHOR_ID)));
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
+        when(crudAuthorEntity.findAllById(Set.of(AUTHOR_ID))).thenReturn(List.of(author));
+        when(movieMapper.toDto(entity)).thenReturn(movieDto(MOVIE_ID, "Interstellar"));
+
+        repository.patch(MOVIE_ID, changes);
+
+        assertThat(entity.getAuthors()).containsExactly(author);
+        verify(crudMovieEntity).save(entity);
+    }
+
+    @Test
+    @DisplayName("patch con authorIds vacío elimina los autores")
+    void patch_withEmptyAuthors_clearsAuthors() {
+        MovieEntity entity = movieEntity(MOVIE_ID, "Interstellar");
+        entity.getAuthors().add(authorEntity(AUTHOR_ID));
+        PatchMovieDto changes = new PatchMovieDto(Optional.empty(), Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.empty(), Optional.of(Set.of()));
+        when(crudMovieEntity.findById(MOVIE_ID)).thenReturn(Optional.of(entity));
+        when(movieMapper.toDto(entity)).thenReturn(movieDto(MOVIE_ID, "Interstellar"));
+
+        repository.patch(MOVIE_ID, changes);
+
+        assertThat(entity.getAuthors()).isEmpty();
+        verify(crudAuthorEntity, never()).findAllById(any());
+        verify(crudMovieEntity).save(entity);
     }
 
     private static MovieEntity movieEntity(UUID id, String title) {
@@ -433,10 +531,18 @@ class MovieEntityRepositoryTest {
     }
 
     private static MovieDto movieDto(UUID id, String title) {
-        return new MovieDto(id, title, 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD");
+        return new MovieDto(id, title, 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD", List.of());
     }
 
     private static CreateMovieDto createRequest(String title) {
         return new CreateMovieDto(title, 169, Genre.SCI_FI, RELEASE_DATE, 8.6);
+    }
+
+    private static AuthorEntity authorEntity(UUID id) {
+        AuthorEntity author = new AuthorEntity();
+        author.setId(id);
+        author.setName("Christopher");
+        author.setLastName("Nolan");
+        return author;
     }
 }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterAll;
@@ -148,6 +149,16 @@ class PatchMovieDtoValidationTest {
                 Optional.of(8.6),
                 Optional.of(Genre.SCI_FI),
                 Optional.of(true));
+
+        assertThat(validator.validate(dto)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("Un PATCH solo con authorIds es válido")
+    void authorIdsOnly_isValid() {
+        PatchMovieDto dto = new PatchMovieDto(Optional.empty(), Optional.empty(), Optional.empty(),
+                Optional.empty(), Optional.empty(),
+                Optional.of(Set.of(UUID.fromString("019b7c01-0bd0-7003-a001-0000030235ad"))));
 
         assertThat(validator.validate(dto)).isEmpty();
     }

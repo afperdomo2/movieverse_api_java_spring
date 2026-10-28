@@ -157,7 +157,8 @@ class MovieServiceTest {
     }
 
     private static MovieDto movieDto(UUID id, String title) {
-        return new MovieDto(id, title, 169, Genre.SCI_FI, LocalDate.of(2014, 11, 7), true, 8.6, "VERY_GOOD");
+        return new MovieDto(id, title, 169, Genre.SCI_FI, LocalDate.of(2014, 11, 7), true, 8.6, "VERY_GOOD",
+                List.of());
     }
 
     private static CreateMovieDto createRequest(String title) {

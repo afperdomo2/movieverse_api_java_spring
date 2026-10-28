@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.DisplayName;
@@ -13,9 +14,11 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import com.afperdomo2.movieverse.domain.Genre;
+import com.afperdomo2.movieverse.domain.dto.AuthorSummaryDto;
 import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.dto.MovieDto;
 import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
+import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
 
 class MovieMapperTest {
@@ -73,7 +76,8 @@ class MovieMapperTest {
     @Test
     @DisplayName("toEntity mapea todos los campos del DTO")
     void toEntity_mapsAllFields() {
-        MovieDto dto = new MovieDto(MOVIE_ID, "Interstellar", 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD");
+        MovieDto dto = new MovieDto(MOVIE_ID, "Interstellar", 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD",
+                List.of());
 
         MovieEntity entity = mapper.toEntity(dto);
 
@@ -89,7 +93,8 @@ class MovieMapperTest {
     @Test
     @DisplayName("toEntity no establece los campos de auditoría ni la versión")
     void toEntity_doesNotSetAuditOrVersionFields() {
-        MovieDto dto = new MovieDto(MOVIE_ID, "Interstellar", 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD");
+        MovieDto dto = new MovieDto(MOVIE_ID, "Interstellar", 169, Genre.SCI_FI, RELEASE_DATE, true, 8.6, "VERY_GOOD",
+                List.of());
 
         MovieEntity entity = mapper.toEntity(dto);
 
@@ -187,6 +192,36 @@ class MovieMapperTest {
         assertThat(entity.getCreatedAt()).isEqualTo(createdAt);
         assertThat(entity.getUpdatedAt()).isEqualTo(updatedAt);
         assertThat(entity.getVersion()).isEqualTo(3L);
+    }
+
+    @Test
+    @DisplayName("toDto mapea los autores ordenados por apellido y nombre")
+    void toDto_mapsAuthorsSorted() {
+        MovieEntity entity = movieEntity();
+        entity.setAuthors(Set.of(
+                authorEntity("019b7c01-0bd0-7003-a001-0000030235ad", "Christopher", "Nolan"),
+                authorEntity("019b7c01-0400-7001-8aab-00000100bc8f", "Frank", "Darabont")));
+
+        MovieDto dto = mapper.toDto(entity);
+
+        assertThat(dto.authors()).extracting(AuthorSummaryDto::lastName)
+                .containsExactly("Darabont", "Nolan");
+    }
+
+    @Test
+    @DisplayName("toDto devuelve una lista vacía cuando la película no tiene autores")
+    void toDto_returnsEmptyAuthors_whenNoAuthors() {
+        MovieDto dto = mapper.toDto(movieEntity());
+
+        assertThat(dto.authors()).isEmpty();
+    }
+
+    private static AuthorEntity authorEntity(String id, String name, String lastName) {
+        AuthorEntity author = new AuthorEntity();
+        author.setId(UUID.fromString(id));
+        author.setName(name);
+        author.setLastName(lastName);
+        return author;
     }
 
     private static MovieEntity movieEntity() {
