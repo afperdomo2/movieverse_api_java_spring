@@ -20,8 +20,8 @@ import com.afperdomo2.movieverse.domain.dto.author.UpdateAuthorDto;
 import com.afperdomo2.movieverse.domain.exception.AuthorAlreadyExistsException;
 import com.afperdomo2.movieverse.domain.exception.AuthorNotFoundException;
 import com.afperdomo2.movieverse.domain.repository.AuthorRepository;
-import com.afperdomo2.movieverse.persistence.crud.CrudAuthorEntity;
-import com.afperdomo2.movieverse.persistence.crud.CrudMovieEntity;
+import com.afperdomo2.movieverse.persistence.jpa.AuthorJpaRepository;
+import com.afperdomo2.movieverse.persistence.jpa.MovieJpaRepository;
 import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 import com.afperdomo2.movieverse.persistence.mapper.AuthorMapper;
 import com.afperdomo2.movieverse.persistence.mapper.MovieMapper;
@@ -29,15 +29,15 @@ import com.afperdomo2.movieverse.common.uuid.UuidV7Generator;
 
 @Repository
 public class AuthorEntityRepository implements AuthorRepository {
-    private final CrudAuthorEntity crudAuthorEntity;
-    private final CrudMovieEntity crudMovieEntity;
+    private final AuthorJpaRepository authorJpaRepository;
+    private final MovieJpaRepository movieJpaRepository;
     private final AuthorMapper authorMapper;
     private final MovieMapper movieMapper;
 
-    public AuthorEntityRepository(CrudAuthorEntity crudAuthorEntity, CrudMovieEntity crudMovieEntity,
+    public AuthorEntityRepository(AuthorJpaRepository authorJpaRepository, MovieJpaRepository movieJpaRepository,
             AuthorMapper authorMapper, MovieMapper movieMapper) {
-        this.crudAuthorEntity = crudAuthorEntity;
-        this.crudMovieEntity = crudMovieEntity;
+        this.authorJpaRepository = authorJpaRepository;
+        this.movieJpaRepository = movieJpaRepository;
         this.authorMapper = authorMapper;
         this.movieMapper = movieMapper;
     }
@@ -45,7 +45,7 @@ public class AuthorEntityRepository implements AuthorRepository {
     @Override
     public PageResponse<AuthorDto> findPage(int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("lastName", "name"));
-        Page<AuthorEntity> result = this.crudAuthorEntity.findAll(pageable);
+        Page<AuthorEntity> result = this.authorJpaRepository.findAll(pageable);
         List<AuthorDto> items = this.authorMapper.toDto(result.getContent());
 
         return new PageResponse<>(
@@ -63,19 +63,19 @@ public class AuthorEntityRepository implements AuthorRepository {
     public AuthorDetailDto findById(UUID id) {
         AuthorEntity author = findEntity(id);
         List<MovieSummaryDto> movies = this.movieMapper.toSummaryDto(
-                this.crudMovieEntity.findByAuthorId(id));
+                this.movieJpaRepository.findByAuthorId(id));
         return this.authorMapper.toDetailDto(author, movies);
     }
 
     @Override
     public AuthorDto create(CreateAuthorDto authorDto) {
-        if (this.crudAuthorEntity.findByNameAndLastName(authorDto.name(), authorDto.lastName()) != null) {
+        if (this.authorJpaRepository.findByNameAndLastName(authorDto.name(), authorDto.lastName()) != null) {
             throw new AuthorAlreadyExistsException(authorDto.name(), authorDto.lastName());
         }
         AuthorEntity newAuthor = new AuthorEntity();
         this.authorMapper.createEntityFromDto(authorDto, newAuthor);
         newAuthor.setId(UuidV7Generator.generate());
-        this.crudAuthorEntity.save(newAuthor);
+        this.authorJpaRepository.save(newAuthor);
         return this.authorMapper.toDto(newAuthor);
     }
 
@@ -84,7 +84,7 @@ public class AuthorEntityRepository implements AuthorRepository {
         AuthorEntity author = findEntity(id);
         validateUniqueName(id, changes.name(), changes.lastName());
         this.authorMapper.updateEntityFromDto(changes, author);
-        this.crudAuthorEntity.save(author);
+        this.authorJpaRepository.save(author);
         return this.authorMapper.toDto(author);
     }
 
@@ -114,28 +114,28 @@ public class AuthorEntityRepository implements AuthorRepository {
         changes.biography().ifPresent(author::setBiography);
         changes.active().ifPresent(author::setActive);
 
-        this.crudAuthorEntity.save(author);
+        this.authorJpaRepository.save(author);
         return this.authorMapper.toDto(author);
     }
 
     @Override
     @Transactional
     public boolean delete(UUID id) {
-        if (!this.crudAuthorEntity.existsById(id)) {
+        if (!this.authorJpaRepository.existsById(id)) {
             throw new AuthorNotFoundException(id);
         }
-        this.crudMovieEntity.deleteRelationsByAuthorId(id);
-        this.crudAuthorEntity.deleteById(id);
+        this.movieJpaRepository.deleteRelationsByAuthorId(id);
+        this.authorJpaRepository.deleteById(id);
         return true;
     }
 
     private AuthorEntity findEntity(UUID id) {
-        return this.crudAuthorEntity.findById(id)
+        return this.authorJpaRepository.findById(id)
                 .orElseThrow(() -> new AuthorNotFoundException(id));
     }
 
     private void validateUniqueName(UUID id, String name, String lastName) {
-        AuthorEntity existing = this.crudAuthorEntity.findByNameAndLastName(name, lastName);
+        AuthorEntity existing = this.authorJpaRepository.findByNameAndLastName(name, lastName);
         if (existing != null && !id.equals(existing.getId())) {
             throw new AuthorAlreadyExistsException(name, lastName);
         }

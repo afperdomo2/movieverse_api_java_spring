@@ -33,7 +33,7 @@ flowchart TB
   subgraph Persistence["Capa de persistencia"]
     PER[MovieEntityRepository]
     AER[AuthorEntityRepository]
-    CRUD[CrudMovieEntity / CrudAuthorEntity]
+    JPA[MovieJpaRepository / AuthorJpaRepository]
     MAP[MovieMapper / AuthorMapper / RatingMapper]
     ENT[MovieEntity / AuthorEntity]
     BASE[BaseEntity]
@@ -58,13 +58,13 @@ flowchart TB
   AS --> PAG
   MR -. implementada por .-> PER
   AR -. implementada por .-> AER
-  PER --> CRUD
-  AER --> CRUD
+  PER --> JPA
+  AER --> JPA
   PER --> MAP
   AER --> MAP
   PER --> UUIDG
   AER --> UUIDG
-  CRUD --> ENT
+  JPA --> ENT
   ENT -. hereda .-> BASE
   ENT --> DB
   MS --> DTO
@@ -119,13 +119,13 @@ src/main/java/com/afperdomo2/movieverse/
 │       └── MovieverseAiService.java
 ├── persistence/
 │   ├── converter/GenreConverter.java
-│   ├── crud/
-│   │   ├── CrudAuthorEntity.java
-│   │   └── CrudMovieEntity.java
 │   ├── entity/
 │   │   ├── AuthorEntity.java
 │   │   ├── BaseEntity.java
 │   │   └── MovieEntity.java
+│   ├── jpa/
+│   │   ├── AuthorJpaRepository.java
+│   │   └── MovieJpaRepository.java
 │   ├── mapper/
 │   │   ├── AuthorMapper.java
 │   │   ├── MovieMapper.java
@@ -178,7 +178,7 @@ sequenceDiagram
 - Parámetros inválidos devuelven HTTP 400.
 - `MovieService.findAll()` se mantiene sin paginar porque es la herramienta `@Tool` que usa la IA.
 - `GET /authors` reutiliza `PageQuery` y `PageResponse` de `common/pagination`, y ordena por `lastName` y luego por `name`.
-- `GET /authors/{id}` devuelve `AuthorDetailDto` con `movies` (`MovieSummaryDto`), ordenadas por `releaseDate DESC, title ASC`. Usa `CrudMovieEntity.findByAuthorId`; son 2 consultas y no hay N+1.
+- `GET /authors/{id}` devuelve `AuthorDetailDto` con `movies` (`MovieSummaryDto`), ordenadas por `releaseDate DESC, title ASC`. Usa `MovieJpaRepository.findByAuthorId`; son 2 consultas y no hay N+1.
 
 ## Componentes principales
 
@@ -191,10 +191,10 @@ sequenceDiagram
 | `AuthorService` | Orquesta las operaciones de autores y el detalle con películas |
 | `MovieRepository` | Contrato de persistencia del dominio |
 | `AuthorRepository` | Contrato de persistencia de autores |
-| `MovieEntityRepository` | Implementa el contrato usando `CrudMovieEntity` y MapStruct |
-| `AuthorEntityRepository` | Implementa el CRUD de autores con `CrudAuthorEntity` y MapStruct |
+| `MovieEntityRepository` | Implementa el contrato usando `MovieJpaRepository` y MapStruct |
+| `AuthorEntityRepository` | Implementa el CRUD de autores con `AuthorJpaRepository` y MapStruct |
 | `MovieEntity.authors` | Relación `@ManyToMany` LAZY con `@BatchSize(50)` y tabla `movie_authors` |
-| `CrudMovieEntity` / `CrudAuthorEntity` | Repositorios Spring Data (`JpaRepository`) |
+| `MovieJpaRepository` / `AuthorJpaRepository` | Repositorios Spring Data (`JpaRepository`) en `persistence/jpa` |
 | `BaseEntity` | `@MappedSuperclass` con `id` UUID, `version`, `createdAt` y `updatedAt`; base común de las entidades |
 | `MovieMapper` / `AuthorMapper` | Convierten entre entidades y DTOs |
 | `RatingMapper` | Calcula `ratingString` a partir del rating numérico |
@@ -380,7 +380,7 @@ Para añadir un campo o una operación a una entidad existente:
 6. Añade o actualiza el seed en `data.sql` si aplica.
 7. Ejecuta `.\gradlew.bat test` y `.\gradlew.bat bootRun`.
 
-Para una entidad nueva, replica el bloque completo: un subpaquete en `domain/dto` (por ejemplo `domain/dto/author`), excepción de dominio, interfaz de repositorio, servicio, `AuthorEntity`-style entity, `Crud*Entity`, mapper, repositorio de persistencia y controlador.
+Para una entidad nueva, replica el bloque completo: un subpaquete en `domain/dto` (por ejemplo `domain/dto/author`), excepción de dominio, interfaz de repositorio, servicio, `AuthorEntity`-style entity, `*JpaRepository`, mapper, repositorio de persistencia y controlador.
 
 ## Limitaciones conocidas
 

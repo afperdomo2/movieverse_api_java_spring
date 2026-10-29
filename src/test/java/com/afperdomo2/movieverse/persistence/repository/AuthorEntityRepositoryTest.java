@@ -37,8 +37,8 @@ import com.afperdomo2.movieverse.domain.dto.author.PatchAuthorDto;
 import com.afperdomo2.movieverse.domain.dto.author.UpdateAuthorDto;
 import com.afperdomo2.movieverse.domain.exception.AuthorAlreadyExistsException;
 import com.afperdomo2.movieverse.domain.exception.AuthorNotFoundException;
-import com.afperdomo2.movieverse.persistence.crud.CrudAuthorEntity;
-import com.afperdomo2.movieverse.persistence.crud.CrudMovieEntity;
+import com.afperdomo2.movieverse.persistence.jpa.AuthorJpaRepository;
+import com.afperdomo2.movieverse.persistence.jpa.MovieJpaRepository;
 import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
 import com.afperdomo2.movieverse.persistence.mapper.AuthorMapper;
@@ -53,10 +53,10 @@ class AuthorEntityRepositoryTest {
     private static final UUID UNKNOWN_AUTHOR_ID = UUID.fromString("019b7c01-4a50-7013-8ab1-0000130dfe9d");
 
     @Mock
-    private CrudAuthorEntity crudAuthorEntity;
+    private AuthorJpaRepository authorJpaRepository;
 
     @Mock
-    private CrudMovieEntity crudMovieEntity;
+    private MovieJpaRepository movieJpaRepository;
 
     @Mock
     private AuthorMapper authorMapper;
@@ -76,7 +76,7 @@ class AuthorEntityRepositoryTest {
         List<AuthorEntity> entities = List.of(authorEntity(AUTHOR_ID, "Christopher", "Nolan"));
         List<AuthorDto> dtos = List.of(authorDto(AUTHOR_ID, "Christopher", "Nolan"));
         PageImpl<AuthorEntity> page = new PageImpl<>(entities, PageRequest.of(0, 10), 19);
-        when(crudAuthorEntity.findAll(any(Pageable.class))).thenReturn(page);
+        when(authorJpaRepository.findAll(any(Pageable.class))).thenReturn(page);
         when(authorMapper.toDto(entities)).thenReturn(dtos);
 
         PageResponse<AuthorDto> response = repository.findPage(1, 10);
@@ -90,7 +90,7 @@ class AuthorEntityRepositoryTest {
         assertThat(response.hasPrevious()).isFalse();
 
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
-        verify(crudAuthorEntity).findAll(pageableCaptor.capture());
+        verify(authorJpaRepository).findAll(pageableCaptor.capture());
         Pageable pageable = pageableCaptor.getValue();
         assertThat(pageable.getPageNumber()).isZero();
         assertThat(pageable.getPageSize()).isEqualTo(10);
@@ -105,14 +105,14 @@ class AuthorEntityRepositoryTest {
         MovieEntity movie = movieEntity();
         MovieSummaryDto summary = movieSummaryDto();
         AuthorDetailDto detail = authorDetailDto(List.of(summary));
-        when(crudAuthorEntity.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
-        when(crudMovieEntity.findByAuthorId(AUTHOR_ID)).thenReturn(List.of(movie));
+        when(authorJpaRepository.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
+        when(movieJpaRepository.findByAuthorId(AUTHOR_ID)).thenReturn(List.of(movie));
         when(movieMapper.toSummaryDto(List.of(movie))).thenReturn(List.of(summary));
         when(authorMapper.toDetailDto(entity, List.of(summary))).thenReturn(detail);
 
         assertThat(repository.findById(AUTHOR_ID)).isEqualTo(detail);
-        verify(crudAuthorEntity).findById(AUTHOR_ID);
-        verify(crudMovieEntity).findByAuthorId(AUTHOR_ID);
+        verify(authorJpaRepository).findById(AUTHOR_ID);
+        verify(movieJpaRepository).findByAuthorId(AUTHOR_ID);
     }
 
     @Test
@@ -120,8 +120,8 @@ class AuthorEntityRepositoryTest {
     void findById_returnsEmptyMovies_whenAuthorHasNoMovies() {
         AuthorEntity entity = authorEntity(AUTHOR_ID, "Christopher", "Nolan");
         AuthorDetailDto detail = authorDetailDto(List.of());
-        when(crudAuthorEntity.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
-        when(crudMovieEntity.findByAuthorId(AUTHOR_ID)).thenReturn(List.of());
+        when(authorJpaRepository.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
+        when(movieJpaRepository.findByAuthorId(AUTHOR_ID)).thenReturn(List.of());
         when(movieMapper.toSummaryDto(List.<MovieEntity>of())).thenReturn(List.of());
         when(authorMapper.toDetailDto(entity, List.of())).thenReturn(detail);
 
@@ -131,12 +131,12 @@ class AuthorEntityRepositoryTest {
     @Test
     @DisplayName("findById lanza AuthorNotFoundException cuando el autor no existe")
     void findById_throwsAuthorNotFound_whenEntityDoesNotExist() {
-        when(crudAuthorEntity.findById(UNKNOWN_AUTHOR_ID)).thenReturn(Optional.empty());
+        when(authorJpaRepository.findById(UNKNOWN_AUTHOR_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> repository.findById(UNKNOWN_AUTHOR_ID))
                 .isInstanceOf(AuthorNotFoundException.class)
                 .hasMessageContaining(UNKNOWN_AUTHOR_ID.toString());
-        verify(crudMovieEntity, never()).findByAuthorId(UNKNOWN_AUTHOR_ID);
+        verify(movieJpaRepository, never()).findByAuthorId(UNKNOWN_AUTHOR_ID);
         verify(authorMapper, never()).toDetailDto(any(AuthorEntity.class), any());
     }
 
@@ -159,8 +159,8 @@ class AuthorEntityRepositoryTest {
         AuthorDto result = repository.create(request);
 
         assertThat(result).isEqualTo(created);
-        verify(crudAuthorEntity).findByNameAndLastName("Christopher", "Nolan");
-        verify(crudAuthorEntity).save(entityCaptor.capture());
+        verify(authorJpaRepository).findByNameAndLastName("Christopher", "Nolan");
+        verify(authorJpaRepository).save(entityCaptor.capture());
         AuthorEntity saved = entityCaptor.getValue();
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getId().version()).isEqualTo(7);
@@ -174,13 +174,13 @@ class AuthorEntityRepositoryTest {
     @DisplayName("create lanza AuthorAlreadyExistsException cuando el autor ya existe")
     void create_throwsAuthorAlreadyExists_whenAuthorExists() {
         CreateAuthorDto request = createRequest("Christopher", "Nolan");
-        when(crudAuthorEntity.findByNameAndLastName("Christopher", "Nolan"))
+        when(authorJpaRepository.findByNameAndLastName("Christopher", "Nolan"))
                 .thenReturn(authorEntity(AUTHOR_ID, "Christopher", "Nolan"));
 
         assertThatThrownBy(() -> repository.create(request))
                 .isInstanceOf(AuthorAlreadyExistsException.class)
                 .hasMessageContaining("Christopher Nolan");
-        verify(crudAuthorEntity, never()).save(any(AuthorEntity.class));
+        verify(authorJpaRepository, never()).save(any(AuthorEntity.class));
         verify(authorMapper, never()).createEntityFromDto(any(CreateAuthorDto.class), any(AuthorEntity.class));
     }
 
@@ -191,13 +191,13 @@ class AuthorEntityRepositoryTest {
         UpdateAuthorDto changes = new UpdateAuthorDto("Christopher", "Nolan", "British",
                 BIRTH_DATE, "Director.");
         AuthorDto updated = authorDto(AUTHOR_ID, "Christopher", "Nolan");
-        when(crudAuthorEntity.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
-        when(crudAuthorEntity.findByNameAndLastName("Christopher", "Nolan")).thenReturn(entity);
+        when(authorJpaRepository.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
+        when(authorJpaRepository.findByNameAndLastName("Christopher", "Nolan")).thenReturn(entity);
         when(authorMapper.toDto(entity)).thenReturn(updated);
 
         assertThat(repository.update(AUTHOR_ID, changes)).isEqualTo(updated);
         verify(authorMapper).updateEntityFromDto(changes, entity);
-        verify(crudAuthorEntity).save(entity);
+        verify(authorJpaRepository).save(entity);
     }
 
     @Test
@@ -205,12 +205,12 @@ class AuthorEntityRepositoryTest {
     void update_throwsAuthorNotFound_whenEntityDoesNotExist() {
         UpdateAuthorDto changes = new UpdateAuthorDto("Christopher", "Nolan", "British",
                 BIRTH_DATE, "Director.");
-        when(crudAuthorEntity.findById(UNKNOWN_AUTHOR_ID)).thenReturn(Optional.empty());
+        when(authorJpaRepository.findById(UNKNOWN_AUTHOR_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> repository.update(UNKNOWN_AUTHOR_ID, changes))
                 .isInstanceOf(AuthorNotFoundException.class)
                 .hasMessageContaining(UNKNOWN_AUTHOR_ID.toString());
-        verify(crudAuthorEntity, never()).save(any(AuthorEntity.class));
+        verify(authorJpaRepository, never()).save(any(AuthorEntity.class));
     }
 
     @Test
@@ -219,15 +219,15 @@ class AuthorEntityRepositoryTest {
         AuthorEntity entity = authorEntity(AUTHOR_ID, "Christopher", "Nolan");
         UpdateAuthorDto changes = new UpdateAuthorDto("Frank", "Darabont", "American",
                 BIRTH_DATE, "Director.");
-        when(crudAuthorEntity.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
-        when(crudAuthorEntity.findByNameAndLastName("Frank", "Darabont"))
+        when(authorJpaRepository.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
+        when(authorJpaRepository.findByNameAndLastName("Frank", "Darabont"))
                 .thenReturn(authorEntity(OTHER_AUTHOR_ID, "Frank", "Darabont"));
 
         assertThatThrownBy(() -> repository.update(AUTHOR_ID, changes))
                 .isInstanceOf(AuthorAlreadyExistsException.class)
                 .hasMessageContaining("Frank Darabont");
         verify(authorMapper, never()).updateEntityFromDto(any(UpdateAuthorDto.class), any(AuthorEntity.class));
-        verify(crudAuthorEntity, never()).save(any(AuthorEntity.class));
+        verify(authorJpaRepository, never()).save(any(AuthorEntity.class));
     }
 
     @Test
@@ -237,8 +237,8 @@ class AuthorEntityRepositoryTest {
         PatchAuthorDto changes = new PatchAuthorDto(Optional.empty(), Optional.empty(),
                 Optional.of("British"), Optional.empty(), Optional.empty(), Optional.of(false));
         AuthorDto dto = authorDto(AUTHOR_ID, "Christopher", "Nolan");
-        when(crudAuthorEntity.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
-        when(crudAuthorEntity.findByNameAndLastName("Christopher", "Nolan")).thenReturn(entity);
+        when(authorJpaRepository.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
+        when(authorJpaRepository.findByNameAndLastName("Christopher", "Nolan")).thenReturn(entity);
         when(authorMapper.toDto(entity)).thenReturn(dto);
 
         assertThat(repository.patch(AUTHOR_ID, changes)).isEqualTo(dto);
@@ -246,7 +246,7 @@ class AuthorEntityRepositoryTest {
         assertThat(entity.isActive()).isFalse();
         assertThat(entity.getName()).isEqualTo("Christopher");
         assertThat(entity.getLastName()).isEqualTo("Nolan");
-        verify(crudAuthorEntity).save(entity);
+        verify(authorJpaRepository).save(entity);
     }
 
     @Test
@@ -256,15 +256,15 @@ class AuthorEntityRepositoryTest {
         PatchAuthorDto changes = new PatchAuthorDto(Optional.of("Chris"), Optional.of("Nolan"),
                 Optional.empty(), Optional.empty(), Optional.empty());
         AuthorDto dto = authorDto(AUTHOR_ID, "Chris", "Nolan");
-        when(crudAuthorEntity.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
-        when(crudAuthorEntity.findByNameAndLastName("Chris", "Nolan")).thenReturn(null);
+        when(authorJpaRepository.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
+        when(authorJpaRepository.findByNameAndLastName("Chris", "Nolan")).thenReturn(null);
         when(authorMapper.toDto(entity)).thenReturn(dto);
 
         repository.patch(AUTHOR_ID, changes);
 
         assertThat(entity.getName()).isEqualTo("Chris");
         assertThat(entity.getLastName()).isEqualTo("Nolan");
-        verify(crudAuthorEntity).save(entity);
+        verify(authorJpaRepository).save(entity);
     }
 
     @Test
@@ -273,15 +273,15 @@ class AuthorEntityRepositoryTest {
         AuthorEntity entity = authorEntity(AUTHOR_ID, "Christopher", "Nolan");
         PatchAuthorDto changes = new PatchAuthorDto(Optional.empty(), Optional.of("Darabont"),
                 Optional.empty(), Optional.empty(), Optional.empty());
-        when(crudAuthorEntity.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
-        when(crudAuthorEntity.findByNameAndLastName("Christopher", "Darabont"))
+        when(authorJpaRepository.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
+        when(authorJpaRepository.findByNameAndLastName("Christopher", "Darabont"))
                 .thenReturn(authorEntity(OTHER_AUTHOR_ID, "Christopher", "Darabont"));
 
         assertThatThrownBy(() -> repository.patch(AUTHOR_ID, changes))
                 .isInstanceOf(AuthorAlreadyExistsException.class)
                 .hasMessageContaining("Christopher Darabont");
         assertThat(entity.getLastName()).isEqualTo("Nolan");
-        verify(crudAuthorEntity, never()).save(any(AuthorEntity.class));
+        verify(authorJpaRepository, never()).save(any(AuthorEntity.class));
     }
 
     @Test
@@ -291,34 +291,34 @@ class AuthorEntityRepositoryTest {
         PatchAuthorDto changes = new PatchAuthorDto(Optional.empty(), Optional.empty(),
                 Optional.empty(), Optional.empty(), Optional.empty());
         AuthorDto dto = authorDto(AUTHOR_ID, "Christopher", "Nolan");
-        when(crudAuthorEntity.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
+        when(authorJpaRepository.findById(AUTHOR_ID)).thenReturn(Optional.of(entity));
         when(authorMapper.toDto(entity)).thenReturn(dto);
 
         assertThat(repository.patch(AUTHOR_ID, changes)).isEqualTo(dto);
-        verify(crudAuthorEntity, never()).save(any(AuthorEntity.class));
-        verify(crudAuthorEntity, never()).findByNameAndLastName(any(), any());
+        verify(authorJpaRepository, never()).save(any(AuthorEntity.class));
+        verify(authorJpaRepository, never()).findByNameAndLastName(any(), any());
     }
 
     @Test
     @DisplayName("delete elimina el autor y devuelve true")
     void delete_returnsTrue_whenAuthorExists() {
-        when(crudAuthorEntity.existsById(AUTHOR_ID)).thenReturn(true);
+        when(authorJpaRepository.existsById(AUTHOR_ID)).thenReturn(true);
 
         assertThat(repository.delete(AUTHOR_ID)).isTrue();
-        verify(crudMovieEntity).deleteRelationsByAuthorId(AUTHOR_ID);
-        verify(crudAuthorEntity).deleteById(AUTHOR_ID);
+        verify(movieJpaRepository).deleteRelationsByAuthorId(AUTHOR_ID);
+        verify(authorJpaRepository).deleteById(AUTHOR_ID);
     }
 
     @Test
     @DisplayName("delete lanza AuthorNotFoundException cuando el autor no existe")
     void delete_throwsAuthorNotFound_whenAuthorDoesNotExist() {
-        when(crudAuthorEntity.existsById(UNKNOWN_AUTHOR_ID)).thenReturn(false);
+        when(authorJpaRepository.existsById(UNKNOWN_AUTHOR_ID)).thenReturn(false);
 
         assertThatThrownBy(() -> repository.delete(UNKNOWN_AUTHOR_ID))
                 .isInstanceOf(AuthorNotFoundException.class)
                 .hasMessageContaining(UNKNOWN_AUTHOR_ID.toString());
-        verify(crudMovieEntity, never()).deleteRelationsByAuthorId(UNKNOWN_AUTHOR_ID);
-        verify(crudAuthorEntity, never()).deleteById(UNKNOWN_AUTHOR_ID);
+        verify(movieJpaRepository, never()).deleteRelationsByAuthorId(UNKNOWN_AUTHOR_ID);
+        verify(authorJpaRepository, never()).deleteById(UNKNOWN_AUTHOR_ID);
     }
 
     private static AuthorEntity authorEntity(UUID id, String name, String lastName) {

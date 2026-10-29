@@ -24,36 +24,36 @@ import com.afperdomo2.movieverse.domain.exception.AuthorNotFoundException;
 import com.afperdomo2.movieverse.domain.exception.MovieAlreadyExistsException;
 import com.afperdomo2.movieverse.domain.exception.MovieNotFoundException;
 import com.afperdomo2.movieverse.domain.repository.MovieRepository;
-import com.afperdomo2.movieverse.persistence.crud.CrudAuthorEntity;
-import com.afperdomo2.movieverse.persistence.crud.CrudMovieEntity;
+import com.afperdomo2.movieverse.persistence.jpa.AuthorJpaRepository;
+import com.afperdomo2.movieverse.persistence.jpa.MovieJpaRepository;
 import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
 import com.afperdomo2.movieverse.persistence.mapper.MovieMapper;
 
 @Repository
 public class MovieEntityRepository implements MovieRepository {
-    private final CrudMovieEntity crudMovieEntity;
-    private final CrudAuthorEntity crudAuthorEntity;
+    private final MovieJpaRepository movieJpaRepository;
+    private final AuthorJpaRepository authorJpaRepository;
     private final MovieMapper movieMapper;
 
-    public MovieEntityRepository(CrudMovieEntity crudMovieEntity, CrudAuthorEntity crudAuthorEntity,
+    public MovieEntityRepository(MovieJpaRepository movieJpaRepository, AuthorJpaRepository authorJpaRepository,
             MovieMapper movieMapper) {
-        this.crudMovieEntity = crudMovieEntity;
-        this.crudAuthorEntity = crudAuthorEntity;
+        this.movieJpaRepository = movieJpaRepository;
+        this.authorJpaRepository = authorJpaRepository;
         this.movieMapper = movieMapper;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<MovieDto> findAll() {
-        return this.movieMapper.toDto(this.crudMovieEntity.findAll());
+        return this.movieMapper.toDto(this.movieJpaRepository.findAll());
     }
 
     @Override
     @Transactional(readOnly = true)
     public PageResponse<MovieDto> findPage(int page, int limit) {
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("id").ascending());
-        Page<MovieEntity> result = this.crudMovieEntity.findAll(pageable);
+        Page<MovieEntity> result = this.movieJpaRepository.findAll(pageable);
         List<MovieDto> items = this.movieMapper.toDto(result.getContent());
 
         return new PageResponse<>(
@@ -75,14 +75,14 @@ public class MovieEntityRepository implements MovieRepository {
     @Override
     @Transactional
     public MovieDto create(CreateMovieDto movieDto) {
-        if (this.crudMovieEntity.findByTitle(movieDto.title()) != null) {
+        if (this.movieJpaRepository.findByTitle(movieDto.title()) != null) {
             throw new MovieAlreadyExistsException(movieDto.title());
         }
         MovieEntity newMovie = new MovieEntity();
         this.movieMapper.createEntityFromDto(movieDto, newMovie);
         newMovie.setId(UuidV7Generator.generate());
         newMovie.setAuthors(resolveAuthors(movieDto.authorIds()));
-        this.crudMovieEntity.save(newMovie);
+        this.movieJpaRepository.save(newMovie);
         return this.movieMapper.toDto(newMovie);
     }
 
@@ -92,7 +92,7 @@ public class MovieEntityRepository implements MovieRepository {
         MovieEntity movie = findEntity(id);
         this.movieMapper.updateEntityFromDto(changes, movie);
         movie.setAuthors(resolveAuthors(changes.authorIds()));
-        this.crudMovieEntity.save(movie);
+        this.movieJpaRepository.save(movie);
         return this.movieMapper.toDto(movie);
     }
 
@@ -117,7 +117,7 @@ public class MovieEntityRepository implements MovieRepository {
         changes.active().ifPresent(movie::setActive);
         changes.authorIds().ifPresent(authorIds -> movie.setAuthors(resolveAuthors(authorIds)));
 
-        this.crudMovieEntity.save(movie);
+        this.movieJpaRepository.save(movie);
         return this.movieMapper.toDto(movie);
     }
 
@@ -125,7 +125,7 @@ public class MovieEntityRepository implements MovieRepository {
         if (title.equals(movie.getTitle())) {
             return;
         }
-        MovieEntity existing = this.crudMovieEntity.findByTitle(title);
+        MovieEntity existing = this.movieJpaRepository.findByTitle(title);
         if (existing != null && !existing.getId().equals(id)) {
             throw new MovieAlreadyExistsException(title);
         }
@@ -135,16 +135,16 @@ public class MovieEntityRepository implements MovieRepository {
     @Override
     @Transactional
     public boolean delete(UUID id) {
-        if (!this.crudMovieEntity.existsById(id)) {
+        if (!this.movieJpaRepository.existsById(id)) {
             throw new MovieNotFoundException(id);
         }
-        this.crudMovieEntity.deleteRelationsByMovieId(id);
-        this.crudMovieEntity.deleteById(id);
+        this.movieJpaRepository.deleteRelationsByMovieId(id);
+        this.movieJpaRepository.deleteById(id);
         return true;
     }
 
     private MovieEntity findEntity(UUID id) {
-        return this.crudMovieEntity.findById(id)
+        return this.movieJpaRepository.findById(id)
                 .orElseThrow(() -> new MovieNotFoundException(id));
     }
 
@@ -153,7 +153,7 @@ public class MovieEntityRepository implements MovieRepository {
             return new HashSet<>();
         }
 
-        List<AuthorEntity> found = this.crudAuthorEntity.findAllById(authorIds);
+        List<AuthorEntity> found = this.authorJpaRepository.findAllById(authorIds);
         if (found.size() != authorIds.size()) {
             Set<UUID> foundIds = found.stream()
                     .map(AuthorEntity::getId)

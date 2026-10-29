@@ -1,4 +1,4 @@
-package com.afperdomo2.movieverse.persistence.crud;
+package com.afperdomo2.movieverse.persistence.jpa;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
 
-public interface CrudMovieEntity extends JpaRepository<MovieEntity, UUID> {
+public interface MovieJpaRepository extends JpaRepository<MovieEntity, UUID> {
     MovieEntity findByTitle(String title);
 
     @EntityGraph(attributePaths = "authors")
