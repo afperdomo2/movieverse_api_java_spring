@@ -1,4 +1,4 @@
-package com.afperdomo2.movieverse.domain.dto;
+package com.afperdomo2.movieverse.domain.dto.author;
 
 import java.time.LocalDate;
 
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 
-public record UpdateAuthorDto(
+public record CreateAuthorDto(
         @Schema(description = "Nombre del autor", example = "Christopher", maxLength = 100)
         @NotBlank(message = "El nombre es obligatorio")
         @Size(max = 100, message = "El nombre no puede superar los 100 caracteres")

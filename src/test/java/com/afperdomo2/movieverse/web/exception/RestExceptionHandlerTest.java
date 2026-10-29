@@ -21,7 +21,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.afperdomo2.movieverse.domain.Genre;
-import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.CreateMovieDto;
 import com.afperdomo2.movieverse.domain.exception.AuthorAlreadyExistsException;
 import com.afperdomo2.movieverse.domain.exception.AuthorNotFoundException;
 import com.afperdomo2.movieverse.domain.exception.MovieAlreadyExistsException;

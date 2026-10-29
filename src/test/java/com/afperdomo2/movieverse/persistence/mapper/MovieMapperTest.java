@@ -14,11 +14,11 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
 import com.afperdomo2.movieverse.domain.Genre;
-import com.afperdomo2.movieverse.domain.dto.AuthorSummaryDto;
-import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
-import com.afperdomo2.movieverse.domain.dto.MovieDto;
-import com.afperdomo2.movieverse.domain.dto.MovieSummaryDto;
-import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
+import com.afperdomo2.movieverse.domain.dto.author.AuthorSummaryDto;
+import com.afperdomo2.movieverse.domain.dto.movie.CreateMovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.MovieSummaryDto;
+import com.afperdomo2.movieverse.domain.dto.movie.UpdateMovieDto;
 import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 import com.afperdomo2.movieverse.persistence.entity.MovieEntity;
 

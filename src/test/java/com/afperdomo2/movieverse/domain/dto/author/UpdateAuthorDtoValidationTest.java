@@ -1,4 +1,4 @@
-package com.afperdomo2.movieverse.domain.dto;
+package com.afperdomo2.movieverse.domain.dto.author;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,7 +19,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
-class CreateAuthorDtoValidationTest {
+class UpdateAuthorDtoValidationTest {
 
     private static ValidatorFactory validatorFactory;
     private static Validator validator;
@@ -41,20 +41,12 @@ class CreateAuthorDtoValidationTest {
         assertThat(validator.validate(validDto())).isEmpty();
     }
 
-    @Test
-    @DisplayName("Los campos opcionales pueden ser null")
-    void optionalFieldsCanBeNull() {
-        CreateAuthorDto dto = new CreateAuthorDto("Christopher", "Nolan", null, null, null);
-
-        assertThat(validator.validate(dto)).isEmpty();
-    }
-
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = { "   " })
     @DisplayName("El nombre nulo, vacío o en blanco es inválido")
     void blankName_isRejected(String name) {
-        CreateAuthorDto dto = new CreateAuthorDto(name, "Nolan", null, null, null);
+        UpdateAuthorDto dto = new UpdateAuthorDto(name, "Nolan", null, null, null);
 
         assertThat(messages(validator.validate(dto))).containsExactly("El nombre es obligatorio");
     }
@@ -64,7 +56,7 @@ class CreateAuthorDtoValidationTest {
     @ValueSource(strings = { "   " })
     @DisplayName("El apellido nulo, vacío o en blanco es inválido")
     void blankLastName_isRejected(String lastName) {
-        CreateAuthorDto dto = new CreateAuthorDto("Christopher", lastName, null, null, null);
+        UpdateAuthorDto dto = new UpdateAuthorDto("Christopher", lastName, null, null, null);
 
         assertThat(messages(validator.validate(dto))).containsExactly("El apellido es obligatorio");
     }
@@ -72,33 +64,15 @@ class CreateAuthorDtoValidationTest {
     @Test
     @DisplayName("El nombre no puede superar los 100 caracteres")
     void longName_isRejected() {
-        CreateAuthorDto dto = new CreateAuthorDto("a".repeat(101), "Nolan", null, null, null);
+        UpdateAuthorDto dto = new UpdateAuthorDto("a".repeat(101), "Nolan", null, null, null);
 
         assertThat(messages(validator.validate(dto))).containsExactly("El nombre no puede superar los 100 caracteres");
     }
 
     @Test
-    @DisplayName("El apellido no puede superar los 100 caracteres")
-    void longLastName_isRejected() {
-        CreateAuthorDto dto = new CreateAuthorDto("Christopher", "a".repeat(101), null, null, null);
-
-        assertThat(messages(validator.validate(dto)))
-                .containsExactly("El apellido no puede superar los 100 caracteres");
-    }
-
-    @Test
-    @DisplayName("La nacionalidad no puede superar los 100 caracteres")
-    void longNationality_isRejected() {
-        CreateAuthorDto dto = new CreateAuthorDto("Christopher", "Nolan", "a".repeat(101), null, null);
-
-        assertThat(messages(validator.validate(dto)))
-                .containsExactly("La nacionalidad no puede superar los 100 caracteres");
-    }
-
-    @Test
     @DisplayName("La biografía no puede superar los 1000 caracteres")
     void longBiography_isRejected() {
-        CreateAuthorDto dto = new CreateAuthorDto("Christopher", "Nolan", null, null, "a".repeat(1001));
+        UpdateAuthorDto dto = new UpdateAuthorDto("Christopher", "Nolan", null, null, "a".repeat(1001));
 
         assertThat(messages(validator.validate(dto)))
                 .containsExactly("La biografía no puede superar los 1000 caracteres");
@@ -107,19 +81,19 @@ class CreateAuthorDtoValidationTest {
     @Test
     @DisplayName("La fecha de nacimiento futura es inválida")
     void futureBirthDate_isRejected() {
-        CreateAuthorDto dto = new CreateAuthorDto("Christopher", "Nolan", null,
+        UpdateAuthorDto dto = new UpdateAuthorDto("Christopher", "Nolan", null,
                 LocalDate.now().plusDays(1), null);
 
         assertThat(messages(validator.validate(dto)))
                 .containsExactly("La fecha de nacimiento no puede ser mayor a la fecha actual");
     }
 
-    private static CreateAuthorDto validDto() {
-        return new CreateAuthorDto("Christopher", "Nolan", "British-American",
+    private static UpdateAuthorDto validDto() {
+        return new UpdateAuthorDto("Christopher", "Nolan", "British-American",
                 LocalDate.of(1970, 7, 30), "Director.");
     }
 
-    private static Set<String> messages(Set<ConstraintViolation<CreateAuthorDto>> violations) {
+    private static Set<String> messages(Set<ConstraintViolation<UpdateAuthorDto>> violations) {
         return violations.stream()
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.toSet());

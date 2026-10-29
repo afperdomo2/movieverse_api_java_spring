@@ -42,7 +42,7 @@ API REST de películas y autores con **Spring Boot 3.5.4** y **Java 21**, CRUD y
 
 - Flujo: `web/controller` → `domain/service` → interfaz `domain/repository` ← `persistence/repository` → `persistence/crud` → `persistence/entity`.
 - `domain/` no debe importar `persistence/` ni `web/`.
-- DTOs de entidad en `domain/dto`; paginación compartida en `common/pagination`; utilidades transversales como UUID en `common/uuid`; mappers MapStruct en `persistence/mapper`.
+- DTOs de entidad en `domain/dto/{movie,author,ai}` (un subpaquete por agregado); paginación compartida en `common/pagination`; utilidades transversales como UUID en `common/uuid`; mappers MapStruct en `persistence/mapper`.
 - `common/` no debe importar `domain/`, `persistence/` ni `web/`.
 - Para añadir un campo u operación CRUD: DTO, interfaz de repositorio (`MovieRepository` o `AuthorRepository`), implementación en `persistence/repository`, mapper correspondiente y controlador (`MovieController` o `AuthorController`).
 - `GET /movies` es paginado (`page` 1-based por defecto 1, `limit` por defecto 10 y máximo 100) y devuelve `PageResponse<MovieDto>`; `MovieService.findAll()` sigue sin paginar para la herramienta de IA.

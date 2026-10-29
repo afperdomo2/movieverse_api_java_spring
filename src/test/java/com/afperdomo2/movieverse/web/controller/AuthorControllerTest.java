@@ -18,13 +18,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.afperdomo2.movieverse.domain.dto.AuthorDetailDto;
-import com.afperdomo2.movieverse.domain.dto.AuthorDto;
-import com.afperdomo2.movieverse.domain.dto.CreateAuthorDto;
+import com.afperdomo2.movieverse.domain.dto.author.AuthorDetailDto;
+import com.afperdomo2.movieverse.domain.dto.author.AuthorDto;
+import com.afperdomo2.movieverse.domain.dto.author.CreateAuthorDto;
 import com.afperdomo2.movieverse.common.pagination.PageQuery;
 import com.afperdomo2.movieverse.common.pagination.PageResponse;
-import com.afperdomo2.movieverse.domain.dto.PatchAuthorDto;
-import com.afperdomo2.movieverse.domain.dto.UpdateAuthorDto;
+import com.afperdomo2.movieverse.domain.dto.author.PatchAuthorDto;
+import com.afperdomo2.movieverse.domain.dto.author.UpdateAuthorDto;
 import com.afperdomo2.movieverse.domain.service.AuthorService;
 
 @ExtendWith(MockitoExtension.class)

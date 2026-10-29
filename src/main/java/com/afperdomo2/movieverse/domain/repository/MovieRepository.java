@@ -3,11 +3,11 @@ package com.afperdomo2.movieverse.domain.repository;
 import java.util.List;
 import java.util.UUID;
 
-import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
-import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.CreateMovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.MovieDto;
 import com.afperdomo2.movieverse.common.pagination.PageResponse;
-import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
-import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.PatchMovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.UpdateMovieDto;
 
 public interface MovieRepository {
     List<MovieDto> findAll();

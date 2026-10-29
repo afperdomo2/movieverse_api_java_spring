@@ -90,18 +90,21 @@ src/main/java/com/afperdomo2/movieverse/
 │   ├── Genre.java
 │   ├── RatingString.java
 │   ├── dto/
-│   │   ├── AuthorDetailDto.java
-│   │   ├── AuthorDto.java
-│   │   ├── AuthorSummaryDto.java
-│   │   ├── CreateAuthorDto.java
-│   │   ├── CreateMovieDto.java
-│   │   ├── MovieDto.java
-│   │   ├── MovieSummaryDto.java
-│   │   ├── PatchAuthorDto.java
-│   │   ├── PatchMovieDto.java
-│   │   ├── SuggestionRequestDto.java
-│   │   ├── UpdateAuthorDto.java
-│   │   └── UpdateMovieDto.java
+│   │   ├── ai/
+│   │   │   └── SuggestionRequestDto.java
+│   │   ├── author/
+│   │   │   ├── AuthorDetailDto.java
+│   │   │   ├── AuthorDto.java
+│   │   │   ├── AuthorSummaryDto.java
+│   │   │   ├── CreateAuthorDto.java
+│   │   │   ├── PatchAuthorDto.java
+│   │   │   └── UpdateAuthorDto.java
+│   │   └── movie/
+│   │       ├── CreateMovieDto.java
+│   │       ├── MovieDto.java
+│   │       ├── MovieSummaryDto.java
+│   │       ├── PatchMovieDto.java
+│   │       └── UpdateMovieDto.java
 │   ├── exception/
 │   │   ├── AuthorAlreadyExistsException.java
 │   │   ├── AuthorNotFoundException.java
@@ -369,7 +372,7 @@ Para producción, configura las credenciales mediante variables de entorno. El a
 
 Para añadir un campo o una operación a una entidad existente:
 
-1. Actualiza el DTO correspondiente en `domain/dto`.
+1. Actualiza el DTO correspondiente en `domain/dto/movie` o `domain/dto/author`.
 2. Modifica la interfaz `domain/repository/{Movie|Author}Repository`.
 3. Implementa el cambio en `persistence/repository/{Movie|Author}EntityRepository`.
 4. Ajusta `persistence/mapper/{Movie|Author}Mapper` si cambian los campos.
@@ -377,7 +380,7 @@ Para añadir un campo o una operación a una entidad existente:
 6. Añade o actualiza el seed en `data.sql` si aplica.
 7. Ejecuta `.\gradlew.bat test` y `.\gradlew.bat bootRun`.
 
-Para una entidad nueva, replica el bloque completo: `domain/dto`, excepción de dominio, interfaz de repositorio, servicio, `AuthorEntity`-style entity, `Crud*Entity`, mapper, repositorio de persistencia y controlador.
+Para una entidad nueva, replica el bloque completo: un subpaquete en `domain/dto` (por ejemplo `domain/dto/author`), excepción de dominio, interfaz de repositorio, servicio, `AuthorEntity`-style entity, `Crud*Entity`, mapper, repositorio de persistencia y controlador.
 
 ## Limitaciones conocidas
 

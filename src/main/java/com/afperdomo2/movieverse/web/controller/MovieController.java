@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
-import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.CreateMovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.MovieDto;
 import com.afperdomo2.movieverse.common.pagination.PageQuery;
 import com.afperdomo2.movieverse.common.pagination.PageResponse;
-import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
-import com.afperdomo2.movieverse.domain.dto.SuggestionRequestDto;
-import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.PatchMovieDto;
+import com.afperdomo2.movieverse.domain.dto.ai.SuggestionRequestDto;
+import com.afperdomo2.movieverse.domain.dto.movie.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.service.MovieService;
 import com.afperdomo2.movieverse.domain.service.MovieverseAiService;
 

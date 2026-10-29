@@ -30,11 +30,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import com.afperdomo2.movieverse.domain.Genre;
-import com.afperdomo2.movieverse.domain.dto.CreateMovieDto;
-import com.afperdomo2.movieverse.domain.dto.MovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.CreateMovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.MovieDto;
 import com.afperdomo2.movieverse.common.pagination.PageResponse;
-import com.afperdomo2.movieverse.domain.dto.PatchMovieDto;
-import com.afperdomo2.movieverse.domain.dto.UpdateMovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.PatchMovieDto;
+import com.afperdomo2.movieverse.domain.dto.movie.UpdateMovieDto;
 import com.afperdomo2.movieverse.domain.exception.MovieAlreadyExistsException;
 import com.afperdomo2.movieverse.domain.exception.MovieNotFoundException;
 import com.afperdomo2.movieverse.domain.exception.AuthorNotFoundException;

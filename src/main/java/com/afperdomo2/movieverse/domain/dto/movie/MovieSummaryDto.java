@@ -1,4 +1,4 @@
-package com.afperdomo2.movieverse.domain.dto;
+package com.afperdomo2.movieverse.domain.dto.movie;
 
 import java.time.LocalDate;
 import java.util.UUID;

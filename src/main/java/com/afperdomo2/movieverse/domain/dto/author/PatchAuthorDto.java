@@ -1,4 +1,4 @@
-package com.afperdomo2.movieverse.domain.dto;
+package com.afperdomo2.movieverse.domain.dto.author;
 
 import java.time.LocalDate;
 import java.util.Optional;

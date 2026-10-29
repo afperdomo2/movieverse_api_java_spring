@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.afperdomo2.movieverse.domain.dto.AuthorDetailDto;
-import com.afperdomo2.movieverse.domain.dto.AuthorDto;
-import com.afperdomo2.movieverse.domain.dto.CreateAuthorDto;
+import com.afperdomo2.movieverse.domain.dto.author.AuthorDetailDto;
+import com.afperdomo2.movieverse.domain.dto.author.AuthorDto;
+import com.afperdomo2.movieverse.domain.dto.author.CreateAuthorDto;
 import com.afperdomo2.movieverse.common.pagination.PageQuery;
 import com.afperdomo2.movieverse.common.pagination.PageResponse;
-import com.afperdomo2.movieverse.domain.dto.PatchAuthorDto;
-import com.afperdomo2.movieverse.domain.dto.UpdateAuthorDto;
+import com.afperdomo2.movieverse.domain.dto.author.PatchAuthorDto;
+import com.afperdomo2.movieverse.domain.dto.author.UpdateAuthorDto;
 import com.afperdomo2.movieverse.domain.service.AuthorService;
 
 import io.swagger.v3.oas.annotations.Operation;

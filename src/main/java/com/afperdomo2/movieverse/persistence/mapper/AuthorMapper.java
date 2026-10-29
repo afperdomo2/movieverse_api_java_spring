@@ -6,11 +6,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-import com.afperdomo2.movieverse.domain.dto.AuthorDetailDto;
-import com.afperdomo2.movieverse.domain.dto.AuthorDto;
-import com.afperdomo2.movieverse.domain.dto.CreateAuthorDto;
-import com.afperdomo2.movieverse.domain.dto.MovieSummaryDto;
-import com.afperdomo2.movieverse.domain.dto.UpdateAuthorDto;
+import com.afperdomo2.movieverse.domain.dto.author.AuthorDetailDto;
+import com.afperdomo2.movieverse.domain.dto.author.AuthorDto;
+import com.afperdomo2.movieverse.domain.dto.author.CreateAuthorDto;
+import com.afperdomo2.movieverse.domain.dto.movie.MovieSummaryDto;
+import com.afperdomo2.movieverse.domain.dto.author.UpdateAuthorDto;
 import com.afperdomo2.movieverse.persistence.entity.AuthorEntity;
 
 @Mapper(componentModel = "spring")
